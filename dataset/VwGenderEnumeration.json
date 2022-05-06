@@ -1,0 +1,25 @@
+{
+	"name": "VwGenderEnumeration",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureIngestiontablelink",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Actual_value",
+				"type": "varchar"
+			},
+			{
+				"name": "Proposed_Value",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Vw_Enumeration_Gender"
+		}
+	}
+}

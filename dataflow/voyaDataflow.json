@@ -1,0 +1,28 @@
+{
+	"name": "voyaDataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "VoyaJsonDataset",
+						"type": "DatasetReference"
+					},
+					"name": "VoyaJsonDataFlow"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [],
+			"script": "source(output(\n\t\tA as string,\n\t\tB as string,\n\t\tC as string,\n\t\tD as double,\n\t\tE as string,\n\t\tF as string,\n\t\tG as string,\n\t\tH as string,\n\t\tI as string,\n\t\tJ as string,\n\t\tK as string,\n\t\tL as string,\n\t\tM as string,\n\t\tN as string,\n\t\tO as string,\n\t\tP as string,\n\t\tQ as string,\n\t\tR as string,\n\t\tS as string,\n\t\tT as string,\n\t\tU as string,\n\t\tV as string,\n\t\tW as string,\n\t\tX as string,\n\t\tY as string,\n\t\tZ as string,\n\t\tAA as string,\n\t\tAB as string,\n\t\tAC as string,\n\t\tAD as string,\n\t\tAE as string,\n\t\tAF as string,\n\t\tAG as string,\n\t\tAH as string,\n\t\tAI as string,\n\t\tAJ as string,\n\t\tAK as double,\n\t\tAL as string,\n\t\tAM as string,\n\t\tAN as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'singleDocument') ~> VoyaJsonDataFlow\nVoyaJsonDataFlow sink(input(\n\t\tProp_0 as string,\n\t\tProp_1 as string,\n\t\tProp_2 as string,\n\t\tProp_3 as string,\n\t\tProp_4 as string,\n\t\tProp_5 as string,\n\t\tProp_6 as string,\n\t\tProp_7 as string,\n\t\tProp_8 as string,\n\t\tProp_9 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['VOYAADF.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+		}
+	}
+}

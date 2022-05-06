@@ -1,0 +1,17 @@
+{
+	"name": "DestinationDataset_lqe",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": " #TempVoya",
+			"table": "Azure Blob Storage file"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

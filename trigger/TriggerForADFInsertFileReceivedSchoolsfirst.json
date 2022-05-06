@@ -1,0 +1,18 @@
+{
+	"name": "TriggerForADFInsertFileReceivedSchoolsfirst",
+	"properties": {
+		"description": "TriggerForADFInsertFileReceivedSchoolsfirst",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/tsm/blobs/schoolsfirst/",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

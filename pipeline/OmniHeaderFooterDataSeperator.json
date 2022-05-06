@@ -1,0 +1,75 @@
+{
+	"name": "OmniHeaderFooterDataSeperator",
+	"properties": {
+		"activities": [
+			{
+				"name": "OmniseperateheaderfooterData",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "OmniheaderFooterManage",
+						"type": "DataFlowReference",
+						"parameters": {
+							"Container": {
+								"value": "'@{pipeline().parameters.Container}'",
+								"type": "Expression"
+							},
+							"Folder": {
+								"value": "'@{pipeline().parameters.Folder}'",
+								"type": "Expression"
+							},
+							"filenameandextension": {
+								"value": "'@{pipeline().parameters.FileNameWithExtension}'",
+								"type": "Expression"
+							}
+						},
+						"datasetParameters": {
+							"omni": {
+								"Container": {
+									"value": "@pipeline().parameters.Container",
+									"type": "Expression"
+								},
+								"Folder": {
+									"value": "@pipeline().parameters.Folder",
+									"type": "Expression"
+								},
+								"FilenameWithExtension": {
+									"value": "@pipeline().parameters.FileNameWithExtension",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"parameters": {
+			"Container": {
+				"type": "string"
+			},
+			"Folder": {
+				"type": "string"
+			},
+			"FileNameWithExtension": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-02-02T18:52:59Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

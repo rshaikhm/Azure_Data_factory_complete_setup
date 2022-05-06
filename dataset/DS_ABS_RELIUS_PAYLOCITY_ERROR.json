@@ -1,0 +1,23 @@
+{
+	"name": "DS_ABS_RELIUS_PAYLOCITY_ERROR",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageRelius",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "paylocity/error",
+				"container": "relius"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

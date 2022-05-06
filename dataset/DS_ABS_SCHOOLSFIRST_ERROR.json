@@ -1,0 +1,24 @@
+{
+	"name": "DS_ABS_SCHOOLSFIRST_ERROR",
+	"properties": {
+		"description": "DS_ABS_SCHOOLSFIRST_ERROR",
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "schoolsfirst/error",
+				"container": "tsm"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

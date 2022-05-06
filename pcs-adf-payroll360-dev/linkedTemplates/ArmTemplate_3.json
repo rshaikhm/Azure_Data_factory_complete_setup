@@ -1,0 +1,2406 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "pcs-adf-payroll360-dev"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/OmniData')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "omni/omnidata",
+						"container": "temp"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OmniDelimited')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					},
+					"Folder": {
+						"type": "string"
+					},
+					"FilenameWithExtension": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().FilenameWithExtension",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().Folder",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OmniFilteredDataSource')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "OmniFilteredData.txt",
+						"folderPath": "omni/omnidata",
+						"container": "temp"
+					},
+					"columnDelimiter": "|",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OmniFilteredFooterSource')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "OmniFilterFooterData.txt",
+						"folderPath": "omni/omnifooter",
+						"container": "temp"
+					},
+					"columnDelimiter": "|",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OmniFinalSource')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "OmniConsolidated.csv",
+						"folderPath": "omni/consolidatedomni",
+						"container": "temp"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OmniFooterRow')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "omni/omnifooter",
+						"container": "temp"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OmniHeaderFilteredSource')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "OmniFilteredHeaderData.txt",
+						"folderPath": "omni/omniheader",
+						"container": "temp"
+					},
+					"columnDelimiter": "|",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OmniHeaderRow')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "omni/omniheader",
+						"container": "temp"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OmniTest')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "OMNI_201020_150334.TXT",
+						"container": "for-development"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceBlobPath')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					},
+					"FilePath": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().FilePath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/StagingIngestionTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureIngestiontablelink",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tbl_Staging_Contribution_Data"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/StagingIngestionTempTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureIngestiontablelink",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Landing_Contribution_Data_ID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "File_received_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Inbound_File_Setup_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Company_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Check_Date",
+						"type": "date"
+					},
+					{
+						"name": "SSN",
+						"type": "varchar"
+					},
+					{
+						"name": "First_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Middle_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Last_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Title",
+						"type": "varchar"
+					},
+					{
+						"name": "Employee_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Gender",
+						"type": "varchar"
+					},
+					{
+						"name": "Employee_Status",
+						"type": "varchar"
+					},
+					{
+						"name": "Marital_Status",
+						"type": "varchar"
+					},
+					{
+						"name": "Division_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Union_Status",
+						"type": "varchar"
+					},
+					{
+						"name": "Address_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Address_2",
+						"type": "varchar"
+					},
+					{
+						"name": "City",
+						"type": "varchar"
+					},
+					{
+						"name": "State",
+						"type": "varchar"
+					},
+					{
+						"name": "Zip",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Birth_Date",
+						"type": "date"
+					},
+					{
+						"name": "Hire_Date",
+						"type": "date"
+					},
+					{
+						"name": "Termination_Date",
+						"type": "date"
+					},
+					{
+						"name": "Rehire_Date",
+						"type": "date"
+					},
+					{
+						"name": "Gross_Earnings",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Pay_Period_Hours",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Employee_Deferral",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Employee_Roth",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Payments",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Employee_After_Tax",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Employer_Match",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Safe_Harbor_Match",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Safe_Harbor_Non_Elective",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Qualified_Matching_Contribution",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Qualified_Non_Elective_Contribution",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Profit_Sharing",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Money_Purchase",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Pay_Frequency",
+						"type": "varchar"
+					},
+					{
+						"name": "Email",
+						"type": "varchar"
+					},
+					{
+						"name": "Phone_Number",
+						"type": "varchar"
+					},
+					{
+						"name": "Pay_Type",
+						"type": "varchar"
+					},
+					{
+						"name": "Adjusted_Seniority_Date",
+						"type": "date"
+					},
+					{
+						"name": "Leave_Of_Absence_Begin_Date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Leave_Of_Absence_End_Date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Payroll_Begin_Date",
+						"type": "date"
+					},
+					{
+						"name": "Payroll_End_Date",
+						"type": "date"
+					},
+					{
+						"name": "Cost_Center_1_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Cost_Center_2_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Cost_Center_3_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_Earnings",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Excluded_Earnings",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Section_125",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Additional_Principal_Payments",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Number",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Rollover",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Rollover_Roth",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "YTD_Gross_Earnings",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Earnings",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Hours",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Excluded_Earnings",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Section_125",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Employee_Deferral",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Employee_Roth",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Employee_After_Tax",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Loan_Payments",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Loan_Number",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Plan_YTD_Employer_Match",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Safe_Harbor_Match",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Qualified_Matching_Contribution",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Safe_Harbor_Non_Elective",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Qualified_Non_Elective_Contribution",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Profit_Sharing",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Money_Purchase",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Rollover",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Rollover_Roth",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Investment_Election",
+						"type": "varchar"
+					},
+					{
+						"name": "Investment_Change_Date",
+						"type": "date"
+					},
+					{
+						"name": "Recipient_Vendor_Plan_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Detail",
+						"type": "varchar"
+					},
+					{
+						"name": "Employer_EIN",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Employer_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Employer_Plan_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Employer_Sub_Plan_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Originating_Vendor_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Originating_Vendor_Sub_Plan_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Recipient_Vendor_Sub_Plan_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Type_of_Account",
+						"type": "varchar"
+					},
+					{
+						"name": "HR_Area_Or_Location_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "HR_Sub_Area",
+						"type": "varchar"
+					},
+					{
+						"name": "Adjusted_Date_of_Hire",
+						"type": "date"
+					},
+					{
+						"name": "Payroll_Mode",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Code_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_1",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_2",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_3",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_4",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_5",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_5",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_6",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_6",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_7",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_7",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_8",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_8",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Final_Contribution_Indicator",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Number_1",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Loan_Repayment_Amount_1",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Number_2",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Loan_Repayment_Amout_2",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Number_3",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Loan_Repayment_Amount_3",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Number_4",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Loan_Repayment_Amount_4",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Number_5",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Loan_Repayment_Amount_5",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "OMNI_Field_52",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_53",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_54",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_55",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_56",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_57",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_58",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_59",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_60",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_61",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_62",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_63",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_64",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_65",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_66",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_67",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_1",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_1_Vendor",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_1_File_Release_Time",
+						"type": "time",
+						"scale": 7
+					},
+					{
+						"name": "Record_Level_1_Total_Amount_in_File",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Record_Level_1_Number_of_Contributions",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_1_Datetime",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Record_Level_1_Number_of_Participants",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_2",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_2_Plan_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Remitter_Plan_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Column_D",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Column_E",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Payroll_Date",
+						"type": "date"
+					},
+					{
+						"name": "Record_Level_2_Total_Amount_in_Plan",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Record_Level_2_Number_of_Participants",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_3",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_3_SSN",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Last_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_First_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Remitter_Plan_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Remittance_Type",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Source_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Number_of_Participants",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_3_Column_I",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Amount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Record_Level_4",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_4_Plan_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Remitter_Plan_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Column_D",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Column_E",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Payroll_Date",
+						"type": "date"
+					},
+					{
+						"name": "Record_Level_4_Total_Amount_in_Plan",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Record_Level_4_Number_of_Participants",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_5",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_5_Vendor",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_5_File_Release_Time",
+						"type": "time",
+						"scale": 7
+					},
+					{
+						"name": "Record_Level_5_Total_Amount_in_File",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Record_Level_5_Number_of_Contributions",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_5_Datetime",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Record_Level_5_Number_of_Participants",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Remittance_Type",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Rate",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Balance",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Comments",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_5",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_6",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_7",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_8",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_9",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_10",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_5",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_6",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_7",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_8",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_9",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_10",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_50",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_51",
+						"type": "varchar"
+					},
+					{
+						"name": "PAYLOCITY_Field_71",
+						"type": "varchar"
+					},
+					{
+						"name": "PAYLOCITY_Field_72",
+						"type": "varchar"
+					},
+					{
+						"name": "PAYLOCITY_Field_73",
+						"type": "varchar"
+					},
+					{
+						"name": "PAYLOCITY_Field_74",
+						"type": "varchar"
+					},
+					{
+						"name": "Status",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tbl_Staging_Temp_Data"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SuccessBlobPath')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FilePath": {
+						"type": "String"
+					},
+					"FileName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": "archive",
+						"container": {
+							"value": "@dataset().FilePath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VoyaExcelRawData')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "String"
+					},
+					"Folder": {
+						"type": "String"
+					},
+					"FileNameWithExtension": {
+						"type": "String"
+					},
+					"sheet": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": {
+						"value": "@dataset().sheet",
+						"type": "Expression"
+					},
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().FileNameWithExtension",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().Folder",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					}
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VoyaJsonDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage4",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "VojaTestJson.Json",
+						"container": "for-development"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"A": {
+							"type": "integer"
+						},
+						"B": {
+							"type": "string"
+						},
+						"C": {
+							"type": "integer"
+						},
+						"D": {
+							"type": "number"
+						},
+						"E": {
+							"type": "integer"
+						},
+						"F": {
+							"type": "string"
+						},
+						"G": {
+							"type": "integer"
+						},
+						"H": {
+							"type": "integer"
+						},
+						"I": {
+							"type": "integer"
+						},
+						"J": {
+							"type": "integer"
+						},
+						"K": {
+							"type": "integer"
+						},
+						"L": {
+							"type": "string"
+						},
+						"M": {
+							"type": "string"
+						},
+						"N": {
+							"type": "integer"
+						},
+						"O": {
+							"type": "integer"
+						},
+						"P": {
+							"type": "integer"
+						},
+						"Q": {
+							"type": "integer"
+						},
+						"R": {
+							"type": "string"
+						},
+						"S": {
+							"type": "string"
+						},
+						"T": {
+							"type": "integer"
+						},
+						"U": {
+							"type": "string"
+						},
+						"V": {
+							"type": "string"
+						},
+						"W": {
+							"type": "integer"
+						},
+						"X": {
+							"type": "string"
+						},
+						"Y": {
+							"type": "integer"
+						},
+						"Z": {
+							"type": "integer"
+						},
+						"AA": {
+							"type": "integer"
+						},
+						"AB": {
+							"type": "integer"
+						},
+						"AC": {
+							"type": "integer"
+						},
+						"AD": {
+							"type": "string"
+						},
+						"AE": {
+							"type": "string"
+						},
+						"AF": {
+							"type": "integer"
+						},
+						"AG": {
+							"type": "integer"
+						},
+						"AH": {
+							"type": "integer"
+						},
+						"AI": {
+							"type": "string"
+						},
+						"AJ": {
+							"type": "integer"
+						},
+						"AK": {
+							"type": "number"
+						},
+						"AL": {
+							"type": "integer"
+						},
+						"AM": {
+							"type": "string"
+						},
+						"AN": {
+							"type": "integer"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VwGenderEnumeration')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureIngestiontablelink",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Actual_value",
+						"type": "varchar"
+					},
+					{
+						"name": "Proposed_Value",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Vw_Enumeration_Gender"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VwMaritalStatusEnumeration')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureIngestiontablelink",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Actual_value",
+						"type": "varchar"
+					},
+					{
+						"name": "Proposed_Value",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Vw_Enumeration_Marital_Status"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VwPayFrequencyEnumeration')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureIngestiontablelink",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Actual_value",
+						"type": "varchar"
+					},
+					{
+						"name": "Proposed_Value",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Vw_Enumeration_Pay_Frequency"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VwStateEnumeration')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureIngestiontablelink",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Actual_value",
+						"type": "varchar"
+					},
+					{
+						"name": "Proposed_Value",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Vw_Enumeration_State"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VwUnionStatusEnumeration')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureIngestiontablelink",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Actual_value",
+						"type": "varchar"
+					},
+					{
+						"name": "Proposed_Value",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Vw_Enumeration_Union_Status"
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

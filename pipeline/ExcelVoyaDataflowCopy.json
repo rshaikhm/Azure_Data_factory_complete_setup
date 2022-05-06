@@ -1,0 +1,135 @@
+{
+	"name": "ExcelVoyaDataflowCopy",
+	"properties": {
+		"description": "Run dataflow with Explicit copy to ingest copy source",
+		"activities": [
+			{
+				"name": "LookupUpdatetbl_Voya",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "ExceldataflowVoya",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[transformvoya]",
+						"storedProcedureParameters": {
+							"file_received_id": {
+								"type": "Decimal",
+								"value": {
+									"value": "@pipeline().parameters.file_received_id",
+									"type": "Expression"
+								}
+							},
+							"Result": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.lookup_proc_result",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSqlProcedure",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "ExceldataflowVoya",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "ExcelVoyadataflow",
+						"type": "DataFlowReference",
+						"parameters": {
+							"dsfile_received_id": {
+								"value": "@pipeline().parameters.file_received_id",
+								"type": "Expression"
+							},
+							"parameter1": "$dsfile_received_id"
+						},
+						"datasetParameters": {
+							"ExcelSource": {
+								"Container": {
+									"value": "@pipeline().parameters.container_name",
+									"type": "Expression"
+								},
+								"Folder": {
+									"value": "@pipeline().parameters.folder_name",
+									"type": "Expression"
+								},
+								"FileNameWithExtension": {
+									"value": "@pipeline().parameters.file_name",
+									"type": "Expression"
+								},
+								"sheet": {
+									"value": "@pipeline().parameters.sheet",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"parameters": {
+			"file_name": {
+				"type": "string",
+				"defaultValue": "VOYA_12042019_$27292.05.csv"
+			},
+			"container_name": {
+				"type": "string",
+				"defaultValue": "tsm"
+			},
+			"folder_name": {
+				"type": "string",
+				"defaultValue": "voya"
+			},
+			"file_received_id": {
+				"type": "int",
+				"defaultValue": 71
+			},
+			"lookup_proc_result": {
+				"type": "int",
+				"defaultValue": 0
+			},
+			"sheet": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-01-29T10:40:32Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

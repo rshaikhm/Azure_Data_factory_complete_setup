@@ -1,0 +1,208 @@
+{
+	"name": "PipelineReliusPaylocity",
+	"properties": {
+		"description": "PipelineReliusPaylocity",
+		"activities": [
+			{
+				"name": "LookupForSP_InsertIntoFileReceivedReliusPaylocity",
+				"description": "LookupForSP_InsertIntoFileReceivedReliusPaylocity",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[SP_InsertIntoFileReceived]",
+						"storedProcedureParameters": {
+							"EmailId": {
+								"type": "String",
+								"value": null
+							},
+							"FileName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.FileName",
+									"type": "Expression"
+								}
+							},
+							"FileType": {
+								"type": "Int32",
+								"value": null
+							},
+							"IngestionType": {
+								"type": "Int32",
+								"value": null
+							},
+							"Result": {
+								"type": "Int32",
+								"value": "0"
+							},
+							"SourceProviderName": {
+								"type": "String",
+								"value": null
+							},
+							"StorageLink": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.FilePath",
+									"type": "Expression"
+								}
+							},
+							"UserName": {
+								"type": "String",
+								"value": null
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ResultOutputOfSPIS0ForReliusPaylocity",
+				"description": "ResultOutputOfSPIS0ForReliusPaylocity",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "LookupForSP_InsertIntoFileReceivedReliusPaylocity",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('LookupForSP_InsertIntoFileReceivedReliusPaylocity').output.value[0].Result,0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "DeleteReliusPaylocity",
+							"type": "Delete",
+							"dependsOn": [
+								{
+									"activity": "CopyDataReliusPaylocity",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_ABS_RELIUS_PAYLOCITY_INPUT",
+									"type": "DatasetReference"
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": false,
+									"wildcardFileName": {
+										"value": "@{pipeline().parameters.FileName}",
+										"type": "Expression"
+									},
+									"enablePartitionDiscovery": false
+								}
+							}
+						},
+						{
+							"name": "CopyDataReliusPaylocity",
+							"description": "CopyDataReliusPaylocity",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": false,
+										"wildcardFolderPath": "/paylocity/",
+										"wildcardFileName": {
+											"value": "@pipeline().parameters.FileName",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": "*"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_ABS_RELIUS_PAYLOCITY_INPUT",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_ABS_RELIUS_PAYLOCITY_ERROR",
+									"type": "DatasetReference"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"FileName": {
+				"type": "string"
+			},
+			"FilePath": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-01-06T11:49:04Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

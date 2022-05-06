@@ -1,0 +1,80 @@
+{
+	"name": "AzureSqlTable1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "File_Received_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "File_Name",
+				"type": "varchar"
+			},
+			{
+				"name": "Received_Date_And_Time",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "Inbound_Source_Setup_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Loaded_By",
+				"type": "varchar"
+			},
+			{
+				"name": "File_Type",
+				"type": "varchar"
+			},
+			{
+				"name": "As_OF_Date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "Actual_File",
+				"type": "varchar"
+			},
+			{
+				"name": "Status",
+				"type": "varchar"
+			},
+			{
+				"name": "Created_By",
+				"type": "varchar"
+			},
+			{
+				"name": "Updated_By",
+				"type": "varchar"
+			},
+			{
+				"name": "Created_Date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "Updated_Date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "tbl_File_Received"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

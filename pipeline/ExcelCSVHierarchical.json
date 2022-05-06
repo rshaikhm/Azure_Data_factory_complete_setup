@@ -1,0 +1,312 @@
+{
+	"name": "ExcelCSVHierarchical",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get PayrollProviderCode",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[Sp_IsHierarchicalData]",
+						"storedProcedureParameters": {
+							"inboundSourceSetupID": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.inboundsourcesetupID",
+									"type": "Expression"
+								}
+							},
+							"isHierarchy": {
+								"type": "String",
+								"value": null
+							},
+							"PayrollProviderCode": {
+								"type": "String",
+								"value": null
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "PayrollProviderCode",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get PayrollProviderCode",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "PayrollProviderCode",
+					"value": {
+						"value": "@activity('Get PayrollProviderCode').output.firstRow.PayrollProviderCode",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Select payroll Provider",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "PayrollProviderCode",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@variables('PayrollProviderCode')",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "OMNI",
+							"activities": [
+								{
+									"name": "OmniFlow",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "OmniBlobtoLanding",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"InboundSourceSetupID": {
+												"value": "@pipeline().parameters.inboundsourcesetupID",
+												"type": "Expression"
+											},
+											"FileReceivedID": {
+												"value": "@pipeline().parameters.filerecievedID",
+												"type": "Expression"
+											},
+											"Container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											},
+											"Folder": {
+												"value": "@pipeline().parameters.folder",
+												"type": "Expression"
+											},
+											"FileNameWithExtension": {
+												"value": "@pipeline().parameters.filenamewithextension",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					],
+					"defaultActivities": [
+						{
+							"name": "Flatten Voya csv",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "DataflowCopy",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"file_name": {
+										"value": "@pipeline().parameters.filenamewithextension",
+										"type": "Expression"
+									},
+									"container_name": {
+										"value": "@pipeline().parameters.container",
+										"type": "Expression"
+									},
+									"folder_name": {
+										"value": "@pipeline().parameters.folder",
+										"type": "Expression"
+									},
+									"file_received_id": {
+										"value": "@pipeline().parameters.filerecievedID",
+										"type": "Expression"
+									},
+									"lookup_proc_result": {
+										"value": "@pipeline().parameters.lookupProcResult",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "DynamicMappingLookup",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "Flatten Voya csv",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderStoredProcedureName": "[dbo].[sp_getColumnMapping]",
+									"storedProcedureParameters": {
+										"inboundSourceSetupID": {
+											"type": "Int32",
+											"value": {
+												"value": "@pipeline().parameters.inboundsourcesetupID",
+												"type": "Expression"
+											}
+										}
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "AzureSqlTable1",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "Copy data voya csv",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "DynamicMappingLookup",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"additionalColumns": [
+										{
+											"name": "InboundSourceSetupID",
+											"value": {
+												"value": "@string(pipeline().parameters.inboundsourcesetupID)",
+												"type": "Expression"
+											}
+										},
+										{
+											"name": "FileReceivedID",
+											"value": {
+												"value": "@string(pipeline().parameters.filerecievedID)",
+												"type": "Expression"
+											}
+										}
+									],
+									"sqlReaderQuery": {
+										"value": "@concat('select \n   c.rowno\tas \tProp_0 ,\nc.column2\tas \tProp_1 ,\nc.column3\tas \tProp_2 ,\nc.column4\tas \tProp_3 ,\nc.column5\tas \tProp_4 ,\nc.column6\tas \tProp_5 ,\nc.column7\tas \tProp_6 ,\nb.rowno\tas \tProp_7\t   ,\nb.column2\tas \tProp_8 ,\nb.column3\tas \tProp_9 ,\nb.column4\tas \tProp_10,\nb.column5\tas \tProp_11,\nb.column6\tas \tProp_12,\nb.column7\tas \tProp_13,\nb.column8\tas \tProp_14,\na.rowno\tas \tProp_15\t   ,\na.column2\tas \tProp_16,\na.column3\tas \tProp_17,\na.column4\tas \tProp_18,\na.column5\tas \tProp_19,\na.column6\tas \tProp_20,\na.column7\tas \tProp_21,\na.column8\tas \tProp_22,\na.column9\tas \tProp_23,\na.column10\tas \tProp_24,\ne.rowno\tas \tProp_25\t   ,\ne.column2\tas \tProp_26,\ne.column3\tas \tProp_27,\ne.column4\tas \tProp_28,\ne.column5\tas \tProp_29,\ne.column6\tas \tProp_30,\ne.column7\tas \tProp_31,\ne.column8\tas \tProp_32,\nd.rowno\tas \tProp_33\t   ,\nd.column2\tas \tProp_34,\nd.column3\tas \tProp_35,\nd.column4\tas \tProp_36,\nd.column5\tas \tProp_37,\nd.column6\tas \tProp_38,\nd.column7\tas \tProp_39\n\n\nfrom dbo.tbl_voya a,dbo.tbl_voya b,dbo.tbl_voya c,dbo.tbl_voya d,dbo.tbl_voya e\nwhere a.rowno =3\nand a.parentid = b.rowno\nand b.rowno =2\nand c.rowno=1\nand d.rowno=5\nand e.rowno=4\nand a.setno = b.setno\nand c.setno = 0\nand b.parentid = c.rowno\nand d.setno = 0\nand e.parentid = c.rowno\nand a.setno = e.setno\nand a.file_received_id = b.file_received_id \nand b.file_received_id = c.file_received_id \nand c.file_received_id = d.file_received_id \nand d.file_received_id = e.file_received_id\nand a.file_received_id =',string(pipeline().parameters.filerecievedID))",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink"
+								},
+								"enableStaging": false,
+								"translator": {
+									"value": "@json(activity('DynamicMappingLookup').output.firstRow.json_output)",
+									"type": "Expression"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "AzureSqlTable1",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "AzureSqlIngestionTable",
+									"type": "DatasetReference"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"ExcelOrCsv": {
+				"type": "string"
+			},
+			"delimiter": {
+				"type": "string"
+			},
+			"folder": {
+				"type": "string"
+			},
+			"container": {
+				"type": "string"
+			},
+			"filenamewithextension": {
+				"type": "string"
+			},
+			"sheet": {
+				"type": "string"
+			},
+			"inboundsourcesetupID": {
+				"type": "int"
+			},
+			"filerecievedID": {
+				"type": "int"
+			},
+			"lookupProcResult": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"PayrollProviderCode": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-02-04T16:56:49Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

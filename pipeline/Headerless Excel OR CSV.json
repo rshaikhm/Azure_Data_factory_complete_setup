@@ -1,0 +1,148 @@
+{
+	"name": "Headerless Excel OR CSV",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExcelOrCsv with No column headers",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@or(equals(pipeline().parameters.ExcelOrCsv,'csv'),equals(pipeline().parameters.ExcelOrCsv,'txt'))",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Execute Pipeline Excel Headerless",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "DynamicamappingXLS headerless",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"inboundsourcesetupid": {
+										"value": "@pipeline().parameters.InboundSourceSetupID",
+										"type": "Expression"
+									},
+									"filereceivedid": {
+										"value": "@pipeline().parameters.FileReceivedID",
+										"type": "Expression"
+									},
+									"FileVendorID": {
+										"value": "@pipeline().parameters.FileVendorID",
+										"type": "Expression"
+									},
+									"container": {
+										"value": "@pipeline().parameters.container",
+										"type": "Expression"
+									},
+									"folder": {
+										"value": "@pipeline().parameters.folder",
+										"type": "Expression"
+									},
+									"Sheet": {
+										"value": "@pipeline().parameters.sheet",
+										"type": "Expression"
+									},
+									"filenamewithextension": {
+										"value": "@pipeline().parameters.Filenamewithextension",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Execute Pipeline Delimited_headerless",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "DelimitedDynamicmapping_Headerless",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"FileVendorID": {
+										"value": "@pipeline().parameters.FileVendorID",
+										"type": "Expression"
+									},
+									"InboundSourceSetupID": {
+										"value": "@pipeline().parameters.InboundSourceSetupID",
+										"type": "Expression"
+									},
+									"FileReceivedID": {
+										"value": "@pipeline().parameters.FileReceivedID",
+										"type": "Expression"
+									},
+									"delimiter": {
+										"value": "@pipeline().parameters.delimiter",
+										"type": "Expression"
+									},
+									"container": {
+										"value": "@pipeline().parameters.container",
+										"type": "Expression"
+									},
+									"folder": {
+										"value": "@pipeline().parameters.folder",
+										"type": "Expression"
+									},
+									"filenamewithextension": {
+										"value": "@pipeline().parameters.Filenamewithextension",
+										"type": "Expression"
+									},
+									"dataHeaderRowNumber": {
+										"value": "@pipeline().parameters.DataHeaderRowNumber",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"ExcelOrCSV": {
+				"type": "string"
+			},
+			"Folder": {
+				"type": "string"
+			},
+			"Container": {
+				"type": "string"
+			},
+			"Sheet": {
+				"type": "string"
+			},
+			"FileReceivedID": {
+				"type": "string"
+			},
+			"FileNameWITHExtension": {
+				"type": "string"
+			},
+			"FileVendorID": {
+				"type": "string"
+			},
+			"InboundSourceSetupID": {
+				"type": "string"
+			},
+			"Delimiter": {
+				"type": "string"
+			},
+			"DataHeaderRowNumber": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-02-10T18:08:06Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

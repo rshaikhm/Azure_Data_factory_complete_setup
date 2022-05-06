@@ -1,0 +1,12 @@
+{
+	"name": "VoyaTransformLinkedService",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"connectionString": "DefaultEndpointsProtocol=https;AccountName=stpayroll360001;EndpointSuffix=core.windows.net;",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIlBDUy1BREYtUEFZUk9MTDM2MC1ERVZfY2Y2NDhkOTYtYmY5NS00N2I2LWI5NTctODY3ZWM2NDM5ZTEyIg0KfQ=="
+		}
+	}
+}

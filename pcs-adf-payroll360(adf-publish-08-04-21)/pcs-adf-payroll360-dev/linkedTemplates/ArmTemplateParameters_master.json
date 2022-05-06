@@ -1,0 +1,111 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "pcs-adf-payroll360-dev"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorage2_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorage3_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorage4_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorageRelius_connectionString": {
+			"value": ""
+		},
+		"AzureIngestiontablelink_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDBReliusValidn_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDatabaseVoya_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDatabaseforVoya_connectionString": {
+			"value": ""
+		},
+		"FtpServer1_password": {
+			"value": ""
+		},
+		"FtpServer2_password": {
+			"value": ""
+		},
+		"TransformVoyaLinkedService_accountKey": {
+			"value": ""
+		},
+		"VoyaTransformLinkedService_connectionString": {
+			"value": ""
+		},
+		"azureftpblob_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorageSourceDatasetEntity_properties_typeProperties_fileName": {
+			"value": "@dataset().file_name"
+		},
+		"AzureBlobStorageSourceDatasetEntity_properties_typeProperties_folderPath": {
+			"value": "@dataset().container_name"
+		},
+		"FtpServer1_properties_typeProperties_host": {
+			"value": "52.249.195.251"
+		},
+		"FtpServer1_properties_typeProperties_userName": {
+			"value": "ftpuser1"
+		},
+		"FtpServer2_properties_typeProperties_host": {
+			"value": "52.249.195.251"
+		},
+		"FtpServer2_properties_typeProperties_userName": {
+			"value": "ftpuser1"
+		},
+		"TransformVoyaLinkedService_properties_typeProperties_url": {
+			"value": "https://stpayroll360001.dfs.core.windows.net"
+		},
+		"ConsolidatedADFTrigger_properties_ConsolidatedPipeline_parameters_FileName": {
+			"value": "@triggerBody().fileName"
+		},
+		"ConsolidatedADFTrigger_properties_ConsolidatedPipeline_parameters_FilePath": {
+			"value": "@triggerBody().folderPath"
+		},
+		"ConsolidatedADFTrigger_properties_typeProperties_scope": {
+			"value": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"TriggerForADFInsertFileReceivedOmni_properties_typeProperties_scope": {
+			"value": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"TriggerForADFInsertFileReceivedPaylocity_properties_typeProperties_scope": {
+			"value": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"TriggerForADFInsertFileReceivedReliusPaylocity_properties_PipelineReliusPaylocity_parameters_FileName": {
+			"value": "@triggerBody().fileName"
+		},
+		"TriggerForADFInsertFileReceivedReliusPaylocity_properties_PipelineReliusPaylocity_parameters_FilePath": {
+			"value": "@triggerBody().folderPath"
+		},
+		"TriggerForADFInsertFileReceivedReliusPaylocity_properties_typeProperties_scope": {
+			"value": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"TriggerForADFInsertFileReceivedSchoolsfirst_properties_typeProperties_scope": {
+			"value": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"TriggerForADFInsertFileReceivedVoya_properties_typeProperties_scope": {
+			"value": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

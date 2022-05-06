@@ -1,0 +1,24 @@
+{
+	"name": "DS_ABS_SCHOOLSFIRST_INPUT",
+	"properties": {
+		"description": "DS_ABS_SCHOOLSFIRST_INPUT",
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "schoolsfirst",
+				"container": "tsm"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,94 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "pcs-adf-payroll360-dev"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/IngestionLandingToStaging')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LandingToStagingDataTransformation",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "LandingToStagingTransformation",
+								"type": "DataFlowReference"
+							},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/LandingToStagingTransformation')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LandingToStagingTransformation')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "AzureSqlIngestionTable",
+								"type": "DatasetReference"
+							},
+							"name": "LandingTable"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "StagingIngestionTable",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "DerivedColumnDecimls"
+						},
+						{
+							"name": "DerivedColumnDecimals2"
+						},
+						{
+							"name": "DerivedColumnDates"
+						}
+					],
+					"script": "source(output(\n\t\tLanding_Contribution_Data_ID as long,\n\t\tFile_received_ID as integer,\n\t\tInbound_File_Setup_ID as integer,\n\t\tPaylocity_Company_Code as string,\n\t\tCheck_Date as string,\n\t\tSSN as string,\n\t\tFirst_Name as string,\n\t\tMiddle_Name as string,\n\t\tLast_Name as string,\n\t\tTitle as string,\n\t\tEmployee_ID as string,\n\t\tGender as string,\n\t\tEmployee_Status as string,\n\t\tMarital_Status as string,\n\t\tDivision_Code as string,\n\t\tUnion_Status as string,\n\t\tAddress_1 as string,\n\t\tAddress_2 as string,\n\t\tCity as string,\n\t\tState as string,\n\t\tZip as string,\n\t\tBirth_Date as string,\n\t\tHire_Date as string,\n\t\tTermination_Date as string,\n\t\tRehire_Date as string,\n\t\tGross_Earnings as string,\n\t\tPay_Period_Hours as string,\n\t\tEmployee_Deferral as string,\n\t\tEmployee_Roth as string,\n\t\tLoan_Payments as string,\n\t\tEmployee_After_Tax as string,\n\t\tEmployer_Match as string,\n\t\tSafe_Harbor_Match as string,\n\t\tSafe_Harbor_Non_Elective as string,\n\t\tQualified_Matching_Contribution as string,\n\t\tQualified_Non_Elective_Contribution as string,\n\t\tProfit_Sharing as string,\n\t\tMoney_Purchase as string,\n\t\tPay_Frequency as string,\n\t\tEmail as string,\n\t\tPhone_Number as string,\n\t\tPay_Type as string,\n\t\tAdjusted_Seniority_Date as string,\n\t\tLeave_Of_Absence_Begin_Date as string,\n\t\tLeave_Of_Absence_End_Date as string,\n\t\tPayroll_Begin_Date as string,\n\t\tPayroll_End_Date as string,\n\t\tCost_Center_1_Code as string,\n\t\tCost_Center_2_Code as string,\n\t\tCost_Center_3_Code as string,\n\t\tPlan_Earnings as string,\n\t\tExcluded_Earnings as string,\n\t\tSection_125 as string,\n\t\tLoan_Additional_Principal_Payments as string,\n\t\tLoan_Number as string,\n\t\tRollover as string,\n\t\tRollover_Roth as string,\n\t\tYTD_Gross_Earnings as string,\n\t\tPlan_YTD_Earnings as string,\n\t\tPlan_YTD_Hours as string,\n\t\tPlan_YTD_Excluded_Earnings as string,\n\t\tPlan_YTD_Section_125 as string,\n\t\tPlan_YTD_Employee_Deferral as string,\n\t\tPlan_YTD_Employee_Roth as string,\n\t\tPlan_YTD_Employee_After_Tax as string,\n\t\tPlan_YTD_Loan_Payments as string,\n\t\tPlan_YTD_Loan_Number as string,\n\t\tPlan_YTD_Employer_Match as string,\n\t\tPlan_YTD_Safe_Harbor_Match as string,\n\t\tPlan_YTD_Qualified_Matching_Contribution as string,\n\t\tPlan_YTD_Safe_Harbor_Non_Elective as string,\n\t\tPlan_YTD_Qualified_Non_Elective_Contribution as string,\n\t\tPlan_YTD_Profit_Sharing as string,\n\t\tPlan_YTD_Money_Purchase as string,\n\t\tPlan_YTD_Rollover as string,\n\t\tPlan_YTD_Rollover_Roth as string,\n\t\tPlan_ID as string,\n\t\tPlan_Name as string,\n\t\tInvestment_Election as string,\n\t\tInvestment_Change_Date as string,\n\t\tRecipient_Vendor_Plan_ID as string,\n\t\tDetail as string,\n\t\tEmployer_EIN as string,\n\t\tEmployer_Name as string,\n\t\tEmployer_Plan_ID as string,\n\t\tEmployer_Sub_Plan_ID as string,\n\t\tOriginating_Vendor_ID as string,\n\t\tOriginating_Vendor_Sub_Plan_ID as string,\n\t\tRecipient_Vendor_Sub_Plan_ID as string,\n\t\tType_of_Account as string,\n\t\tHR_Area_Or_Location_Code as string,\n\t\tHR_Sub_Area as string,\n\t\tAdjusted_Date_of_Hire as string,\n\t\tPayroll_Mode as string,\n\t\tContribution_Source_Code_1 as string,\n\t\tContribution_Source_Amount_1 as string,\n\t\tContribution_Source_Code_2 as string,\n\t\tContribution_Source_Amount_2 as string,\n\t\tContribution_Source_Code_3 as string,\n\t\tContribution_Source_Amount_3 as string,\n\t\tContribution_Source_Code_4 as string,\n\t\tContribution_Source_Amount_4 as string,\n\t\tContribution_Source_Code_5 as string,\n\t\tContribution_Source_Amount_5 as string,\n\t\tContribution_Source_Code_6 as string,\n\t\tContribution_Source_Amount_6 as string,\n\t\tContribution_Source_Code_7 as string,\n\t\tContribution_Source_Amount_7 as string,\n\t\tContribution_Source_Code_8 as string,\n\t\tContribution_Source_Amount_8 as string,\n\t\tFinal_Contribution_Indicator as string,\n\t\tLoan_Number_1 as string,\n\t\tLoan_Repayment_Amount_1 as string,\n\t\tLoan_Number_2 as string,\n\t\tLoan_Repayment_Amout_2 as string,\n\t\tLoan_Number_3 as string,\n\t\tLoan_Repayment_Amount_3 as string,\n\t\tLoan_Number_4 as string,\n\t\tLoan_Repayment_Amount_4 as string,\n\t\tLoan_Number_5 as string,\n\t\tLoan_Repayment_Amount_5 as string,\n\t\tOMNI_Field_52 as string,\n\t\tOMNI_Field_53 as string,\n\t\tOMNI_Field_54 as string,\n\t\tOMNI_Field_55 as string,\n\t\tOMNI_Field_56 as string,\n\t\tOMNI_Field_57 as string,\n\t\tOMNI_Field_58 as string,\n\t\tOMNI_Field_59 as string,\n\t\tOMNI_Field_60 as string,\n\t\tOMNI_Field_61 as string,\n\t\tOMNI_Field_62 as string,\n\t\tOMNI_Field_63 as string,\n\t\tOMNI_Field_64 as string,\n\t\tOMNI_Field_65 as string,\n\t\tOMNI_Field_66 as string,\n\t\tOMNI_Field_67 as string,\n\t\tRecord_Level_1 as string,\n\t\tRecord_Level_1_Vendor as string,\n\t\tRecord_Level_1_File_Release_Time as string,\n\t\tRecord_Level_1_Total_Amount_in_File as string,\n\t\tRecord_Level_1_Number_of_Contributions as string,\n\t\tRecord_Level_1_Datetime as string,\n\t\tRecord_Level_1_Number_of_Participants as string,\n\t\tRecord_Level_2 as string,\n\t\tRecord_Level_2_Plan_Name as string,\n\t\tRecord_Level_2_Remitter_Plan_Code as string,\n\t\tRecord_Level_2_Column_D as string,\n\t\tRecord_Level_2_Column_E as string,\n\t\tRecord_Level_2_Payroll_Date as string,\n\t\tRecord_Level_2_Total_Amount_in_Plan as string,\n\t\tRecord_Level_2_Number_of_Participants as string,\n\t\tRecord_Level_3 as string,\n\t\tRecord_Level_3_SSN as string,\n\t\tRecord_Level_3_Last_Name as string,\n\t\tRecord_Level_3_First_Name as string,\n\t\tRecord_Level_3_Remitter_Plan_Code as string,\n\t\tRecord_Level_3_Remittance_Type as string,\n\t\tRecord_Level_3_Source_Code as string,\n\t\tRecord_Level_3_Number_of_Participants as string,\n\t\tRecord_Level_3_Column_I as string,\n\t\tRecord_Level_3_Amount as string,\n\t\tRecord_Level_4 as string,\n\t\tRecord_Level_4_Plan_Name as string,\n\t\tRecord_Level_4_Remitter_Plan_Code as string,\n\t\tRecord_Level_4_Column_D as string,\n\t\tRecord_Level_4_Column_E as string,\n\t\tRecord_Level_4_Payroll_Date as string,\n\t\tRecord_Level_4_Total_Amount_in_Plan as string,\n\t\tRecord_Level_4_Number_of_Participants as string,\n\t\tRecord_Level_5 as string,\n\t\tRecord_Level_5_Vendor as string,\n\t\tRecord_Level_5_File_Release_Time as string,\n\t\tRecord_Level_5_Total_Amount_in_File as string,\n\t\tRecord_Level_5_Number_of_Contributions as string,\n\t\tRecord_Level_5_Datetime as string,\n\t\tRecord_Level_5_Number_of_Participants as string,\n\t\tRemittance_Type as string,\n\t\tContribution_Rate as string,\n\t\tLoan_Balance as string,\n\t\tComments as string,\n\t\tHeader_Column_1 as string,\n\t\tHeader_Column_2 as string,\n\t\tHeader_Column_3 as string,\n\t\tHeader_Column_4 as string,\n\t\tHeader_Column_5 as string,\n\t\tHeader_Column_6 as string,\n\t\tHeader_Column_7 as string,\n\t\tHeader_Column_8 as string,\n\t\tHeader_Column_9 as string,\n\t\tHeader_Column_10 as string,\n\t\tFooter_Column_1 as string,\n\t\tFooter_Column_2 as string,\n\t\tFooter_Column_3 as string,\n\t\tFooter_Column_4 as string,\n\t\tFooter_Column_5 as string,\n\t\tFooter_Column_6 as string,\n\t\tFooter_Column_7 as string,\n\t\tFooter_Column_8 as string,\n\t\tFooter_Column_9 as string,\n\t\tFooter_Column_10 as string,\n\t\tOMNI_Field_50 as string,\n\t\tOMNI_Field_51 as string,\n\t\tPAYLOCITY_Field_71 as string,\n\t\tPAYLOCITY_Field_72 as string,\n\t\tPAYLOCITY_Field_73 as string,\n\t\tPAYLOCITY_Field_74 as string,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'NONE',\n\tformat: 'table') ~> LandingTable\nLandingTable derive(Gross_Earnings = toDecimal(Gross_Earnings,18,2),\n\t\tPay_Period_Hours = toDecimal(Pay_Period_Hours,18,2),\n\t\tEmployee_Deferral = toDecimal(Employee_Deferral,18,2),\n\t\tEmployee_Roth = toDecimal(Employee_Roth,18,2),\n\t\tLoan_Payments = toDecimal(Loan_Payments,18,2),\n\t\tEmployee_After_Tax = toDecimal(Employee_After_Tax,18,2),\n\t\tEmployer_Match = toDecimal(Employer_Match,18,2),\n\t\tSafe_Harbor_Match = toDecimal(Safe_Harbor_Match,18,2),\n\t\tSafe_Harbor_Non_Elective = toDecimal(Safe_Harbor_Non_Elective,18,2),\n\t\tQualified_Matching_Contribution = toDecimal(Qualified_Matching_Contribution,18,2),\n\t\tQualified_Non_Elective_Contribution = toDecimal(Qualified_Non_Elective_Contribution,18,2),\n\t\tProfit_Sharing = toDecimal(Profit_Sharing,18,2),\n\t\tMoney_Purchase = toDecimal(Money_Purchase,18,2),\n\t\tContribution_Source_Amount_1 = toDecimal(Contribution_Source_Amount_1,18,2)) ~> DerivedColumnDecimls\nDerivedColumnDecimls derive(Contribution_Source_Amount_2 = toDecimal(Contribution_Source_Amount_2,18,2),\n\t\tContribution_Source_Amount_3 = toDecimal(Contribution_Source_Amount_3,18,2),\n\t\tContribution_Source_Amount_4 = toDecimal(Contribution_Source_Amount_4,18,2),\n\t\tContribution_Source_Amount_5 = toDecimal(Contribution_Source_Amount_5,18,2),\n\t\tContribution_Source_Amount_6 = toDecimal(Contribution_Source_Amount_6,18,2),\n\t\tContribution_Source_Amount_7 = toDecimal(Contribution_Source_Amount_7,18,2),\n\t\tContribution_Source_Amount_8 = toDecimal(Contribution_Source_Amount_8,18,2),\n\t\tLoan_Repayment_Amount_1 = toDecimal(Loan_Repayment_Amount_1,18,2),\n\t\tLoan_Repayment_Amout_2 = toDecimal(Loan_Repayment_Amout_2,18,2),\n\t\tLoan_Repayment_Amount_3 = toDecimal(Loan_Repayment_Amount_3,18,2),\n\t\tLoan_Repayment_Amount_4 = toDecimal(Loan_Repayment_Amount_4,18,2),\n\t\tLoan_Repayment_Amount_5 = toDecimal(Loan_Repayment_Amount_5,18,2),\n\t\tRecord_Level_3_Amount = toDecimal(Record_Level_3_Amount,18,2),\n\t\tSSN = replace(SSN,'-','')) ~> DerivedColumnDecimals2\nDerivedColumnDecimals2 derive(Birth_Date = iif(isNull((iif(isNull(toDate(Birth_Date, 'MM/dd/yyyy')),toDate(Birth_Date, 'yyyyMMdd'),toDate(Birth_Date, 'MM/dd/yyyy')))),toDate(Birth_Date,'yyyy-MM-dd'),iif(isNull(toDate(Birth_Date, 'MM/dd/yyyy')),toDate(Birth_Date, 'yyyyMMdd'),toDate(Birth_Date, 'MM/dd/yyyy'))),\n\t\tHire_Date = iif(isNull((iif(isNull(toDate(Hire_Date, 'MM/dd/yyyy')),toDate(Hire_Date, 'yyyyMMdd'),toDate(Hire_Date, 'MM/dd/yyyy')))),toDate(Hire_Date,'yyyy-MM-dd'),iif(isNull(toDate(Hire_Date, 'MM/dd/yyyy')),toDate(Hire_Date, 'yyyyMMdd'),toDate(Hire_Date, 'MM/dd/yyyy'))),\n\t\tTermination_Date = iif(isNull((iif(isNull(toDate(Termination_Date, 'MM/dd/yyyy')),toDate(Termination_Date, 'yyyyMMdd'),toDate(Termination_Date, 'MM/dd/yyyy')))),toDate(Termination_Date,'yyyy-MM-dd'),iif(isNull(toDate(Termination_Date, 'MM/dd/yyyy')),toDate(Termination_Date, 'yyyyMMdd'),toDate(Termination_Date, 'MM/dd/yyyy'))),\n\t\tRehire_Date = iif(isNull((iif(isNull(toDate(Rehire_Date, 'MM/dd/yyyy')),toDate(Rehire_Date, 'yyyyMMdd'),toDate(Rehire_Date, 'MM/dd/yyyy')))),toDate(Rehire_Date,'yyyy-MM-dd'),iif(isNull(toDate(Rehire_Date, 'MM/dd/yyyy')),toDate(Rehire_Date, 'yyyyMMdd'),toDate(Rehire_Date, 'MM/dd/yyyy'))),\n\t\tPayroll_End_Date = iif(isNull((iif(isNull(toDate(Payroll_End_Date, 'MM/dd/yyyy')),toDate(Payroll_End_Date, 'yyyyMMdd'),toDate(Payroll_End_Date, 'MM/dd/yyyy')))),toDate(Payroll_End_Date,'yyyy-MM-dd'),iif(isNull(toDate(Payroll_End_Date, 'MM/dd/yyyy')),toDate(Payroll_End_Date, 'yyyyMMdd'),toDate(Payroll_End_Date, 'MM/dd/yyyy'))),\n\t\tRecord_Level_2_Payroll_Date = iif(isNull((iif(isNull(toDate(Record_Level_2_Payroll_Date, 'MM/dd/yyyy')),toDate(Record_Level_2_Payroll_Date, 'yyyyMMdd'),toDate(Record_Level_2_Payroll_Date, 'MM/dd/yyyy')))),toDate(Record_Level_2_Payroll_Date,'yyyy-MM-dd'),iif(isNull(toDate(Record_Level_2_Payroll_Date, 'MM/dd/yyyy')),toDate(Record_Level_2_Payroll_Date, 'yyyyMMdd'),toDate(Record_Level_2_Payroll_Date, 'MM/dd/yyyy')))) ~> DerivedColumnDates\nDerivedColumnDates sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1"
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

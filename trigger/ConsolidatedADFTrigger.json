@@ -1,0 +1,29 @@
+{
+	"name": "ConsolidatedADFTrigger",
+	"properties": {
+		"description": "ConsolidatedADFTrigger",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "ConsolidatedPipeline",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"FileName": "@triggerBody().fileName",
+					"FilePath": "@triggerBody().folderPath"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/relius/blobs/",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

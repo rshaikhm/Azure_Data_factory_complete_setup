@@ -1,0 +1,178 @@
+{
+	"name": "OmniBlobtoLanding",
+	"properties": {
+		"activities": [
+			{
+				"name": "OmniHeaderFooterDataSeperator",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "OmniHeaderFooterDataSeperator",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Container": {
+							"value": "@pipeline().parameters.Container",
+							"type": "Expression"
+						},
+						"Folder": {
+							"value": "@pipeline().parameters.Folder",
+							"type": "Expression"
+						},
+						"FileNameWithExtension": {
+							"value": "@pipeline().parameters.FileNameWithExtension",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ConsolidateHeaderFooter",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "OmniHeaderFooterDataSeperator",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CombineOmniDataHeaderFooter",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"InboundSourceSetupID": {
+							"value": "@pipeline().parameters.InboundSourceSetupID",
+							"type": "Expression"
+						},
+						"FileReceivedID": {
+							"value": "@pipeline().parameters.FileReceivedID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "DynamicMapping",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "ConsolidateHeaderFooter",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[sp_getColumnMapping]",
+						"storedProcedureParameters": {
+							"inboundSourceSetupID": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.InboundSourceSetupID",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "CopyOmniData",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "DynamicMapping",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink"
+					},
+					"enableStaging": false,
+					"translator": {
+						"value": "@json(activity('DynamicMapping').output.firstRow.json_output)",
+						"type": "Expression"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "OmniFinalSource",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSqlIngestionTable",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"parameters": {
+			"InboundSourceSetupID": {
+				"type": "int"
+			},
+			"FileReceivedID": {
+				"type": "int"
+			},
+			"Container": {
+				"type": "string"
+			},
+			"Folder": {
+				"type": "string"
+			},
+			"FileNameWithExtension": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-02-02T18:53:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,77 @@
+{
+	"name": "IngestionErrorLogTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureIngestiontablelink",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Data_Error_Log_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Landing_Contribution_Data_ID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "Staging_Contribution_Data_ID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "Error_Type",
+				"type": "varchar"
+			},
+			{
+				"name": "Error_Description",
+				"type": "varchar"
+			},
+			{
+				"name": "Error_Column_Name",
+				"type": "varchar"
+			},
+			{
+				"name": "Error_Status",
+				"type": "char"
+			},
+			{
+				"name": "Resolution_Date",
+				"type": "date"
+			},
+			{
+				"name": "Created_By",
+				"type": "varchar"
+			},
+			{
+				"name": "Created_Date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "Updated_By",
+				"type": "varchar"
+			},
+			{
+				"name": "Updated_date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "File_received_ID",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "tbl_Data_Error_Log"
+		}
+	}
+}

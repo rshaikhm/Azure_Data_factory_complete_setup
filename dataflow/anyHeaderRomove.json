@@ -1,0 +1,35 @@
+{
+	"name": "anyHeaderRomove",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "OmniTest",
+						"type": "DatasetReference"
+					},
+					"name": "Omni"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlDatabaseDestinationStore",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "RowNumber"
+				},
+				{
+					"name": "Headerromoval"
+				}
+			],
+			"script": "parameters{\n\theaderroenumber as integer\n}\nsource(output(\n\t\tOmniData as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> Omni\nOmni keyGenerate(output(RowNum as long),\n\tstartAt: 1L) ~> RowNumber\nRowNumber filter(RowNum==$headerroenumber) ~> Headerromoval\nHeaderromoval sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1"
+		}
+	}
+}

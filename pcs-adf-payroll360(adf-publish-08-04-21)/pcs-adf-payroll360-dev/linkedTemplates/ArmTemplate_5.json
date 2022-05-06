@@ -1,0 +1,6290 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "pcs-adf-payroll360-dev"
+		},
+		"TriggerForADFInsertFileReceivedReliusPaylocity_properties_PipelineReliusPaylocity_parameters_FileName": {
+			"type": "string",
+			"defaultValue": "@triggerBody().fileName"
+		},
+		"TriggerForADFInsertFileReceivedReliusPaylocity_properties_PipelineReliusPaylocity_parameters_FilePath": {
+			"type": "string",
+			"defaultValue": "@triggerBody().folderPath"
+		},
+		"TriggerForADFInsertFileReceivedReliusPaylocity_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"ConsolidatedADFTrigger_properties_ConsolidatedPipeline_parameters_FileName": {
+			"type": "string",
+			"defaultValue": "@triggerBody().fileName"
+		},
+		"ConsolidatedADFTrigger_properties_ConsolidatedPipeline_parameters_FilePath": {
+			"type": "string",
+			"defaultValue": "@triggerBody().folderPath"
+		},
+		"ConsolidatedADFTrigger_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/DataflowCopy')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Run dataflow with Explicit copy to ingest copy source",
+				"activities": [
+					{
+						"name": "LookupUpdatetbl_Voya",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "dataflowVoya",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[transformvoya]",
+								"storedProcedureParameters": {
+									"file_received_id": {
+										"type": "Decimal",
+										"value": {
+											"value": "@pipeline().parameters.file_received_id",
+											"type": "Expression"
+										}
+									},
+									"Result": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.lookup_proc_result",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlProcedure",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "dataflowVoya",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflowVoya",
+								"type": "DataFlowReference",
+								"parameters": {
+									"dsfile_received_id": {
+										"value": "@pipeline().parameters.file_received_id",
+										"type": "Expression"
+									},
+									"parameter1": "$dsfile_received_id"
+								},
+								"datasetParameters": {
+									"sourcevoya": {
+										"Filename": {
+											"value": "@pipeline().parameters.file_name",
+											"type": "Expression"
+										},
+										"Container_name": {
+											"value": "@pipeline().parameters.container_name",
+											"type": "Expression"
+										},
+										"file_received_id": {
+											"value": "@pipeline().parameters.file_received_id",
+											"type": "Expression"
+										},
+										"folder_name": {
+											"value": "@pipeline().parameters.folder_name",
+											"type": "Expression"
+										}
+									},
+									"sinkvoya": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"parameters": {
+					"file_name": {
+						"type": "string"
+					},
+					"container_name": {
+						"type": "string"
+					},
+					"folder_name": {
+						"type": "string"
+					},
+					"file_received_id": {
+						"type": "int"
+					},
+					"lookup_proc_result": {
+						"type": "int",
+						"defaultValue": 0
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-01-29T10:40:31Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExcelVoyaDataflowCopy')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Run dataflow with Explicit copy to ingest copy source",
+				"activities": [
+					{
+						"name": "LookupUpdatetbl_Voya",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "ExceldataflowVoya",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[transformvoya]",
+								"storedProcedureParameters": {
+									"file_received_id": {
+										"type": "Decimal",
+										"value": {
+											"value": "@pipeline().parameters.file_received_id",
+											"type": "Expression"
+										}
+									},
+									"Result": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.lookup_proc_result",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlProcedure",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "ExceldataflowVoya",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "ExcelVoyadataflow",
+								"type": "DataFlowReference",
+								"parameters": {
+									"dsfile_received_id": {
+										"value": "@pipeline().parameters.file_received_id",
+										"type": "Expression"
+									},
+									"parameter1": "$dsfile_received_id"
+								},
+								"datasetParameters": {
+									"ExcelSource": {
+										"Container": {
+											"value": "@pipeline().parameters.container_name",
+											"type": "Expression"
+										},
+										"Folder": {
+											"value": "@pipeline().parameters.folder_name",
+											"type": "Expression"
+										},
+										"FileNameWithExtension": {
+											"value": "@pipeline().parameters.file_name",
+											"type": "Expression"
+										},
+										"sheet": {
+											"value": "@pipeline().parameters.sheet",
+											"type": "Expression"
+										}
+									},
+									"sinkvoya": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"parameters": {
+					"file_name": {
+						"type": "string",
+						"defaultValue": "VOYA_12042019_$27292.05.csv"
+					},
+					"container_name": {
+						"type": "string",
+						"defaultValue": "tsm"
+					},
+					"folder_name": {
+						"type": "string",
+						"defaultValue": "voya"
+					},
+					"file_received_id": {
+						"type": "int",
+						"defaultValue": 71
+					},
+					"lookup_proc_result": {
+						"type": "int",
+						"defaultValue": 0
+					},
+					"sheet": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-01-29T10:40:32Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Headerless Excel OR CSV')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExcelOrCsv with No column headers",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@or(equals(pipeline().parameters.ExcelOrCsv,'csv'),equals(pipeline().parameters.ExcelOrCsv,'txt'))",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Execute Pipeline Excel Headerless",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "DynamicamappingXLS headerless",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"inboundsourcesetupid": {
+												"value": "@pipeline().parameters.InboundSourceSetupID",
+												"type": "Expression"
+											},
+											"filereceivedid": {
+												"value": "@pipeline().parameters.FileReceivedID",
+												"type": "Expression"
+											},
+											"FileVendorID": {
+												"value": "@pipeline().parameters.FileVendorID",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											},
+											"folder": {
+												"value": "@pipeline().parameters.folder",
+												"type": "Expression"
+											},
+											"Sheet": {
+												"value": "@pipeline().parameters.sheet",
+												"type": "Expression"
+											},
+											"filenamewithextension": {
+												"value": "@pipeline().parameters.Filenamewithextension",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Execute Pipeline Delimited_headerless",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "DelimitedDynamicmapping_Headerless",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"FileVendorID": {
+												"value": "@pipeline().parameters.FileVendorID",
+												"type": "Expression"
+											},
+											"InboundSourceSetupID": {
+												"value": "@pipeline().parameters.InboundSourceSetupID",
+												"type": "Expression"
+											},
+											"FileReceivedID": {
+												"value": "@pipeline().parameters.FileReceivedID",
+												"type": "Expression"
+											},
+											"delimiter": {
+												"value": "@pipeline().parameters.delimiter",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											},
+											"folder": {
+												"value": "@pipeline().parameters.folder",
+												"type": "Expression"
+											},
+											"filenamewithextension": {
+												"value": "@pipeline().parameters.Filenamewithextension",
+												"type": "Expression"
+											},
+											"dataHeaderRowNumber": {
+												"value": "@pipeline().parameters.DataHeaderRowNumber",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"ExcelOrCSV": {
+						"type": "string"
+					},
+					"Folder": {
+						"type": "string"
+					},
+					"Container": {
+						"type": "string"
+					},
+					"Sheet": {
+						"type": "string"
+					},
+					"FileReceivedID": {
+						"type": "string"
+					},
+					"FileNameWITHExtension": {
+						"type": "string"
+					},
+					"FileVendorID": {
+						"type": "string"
+					},
+					"InboundSourceSetupID": {
+						"type": "string"
+					},
+					"Delimiter": {
+						"type": "string"
+					},
+					"DataHeaderRowNumber": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-10T18:08:06Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/IngestionLandingToStaging')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LandingToStagingDataTransformation",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "LandingToStagingTransformation",
+								"type": "DataFlowReference",
+								"parameters": {
+									"FileReceivedID": "'65'"
+								},
+								"datasetParameters": {
+									"LandingTable": {},
+									"GenderEnumeration": {},
+									"MaritalStatusEnumeration": {},
+									"PayFrequencyEnumeration": {},
+									"StateEnumeration": {},
+									"UnionStatusEnumeration": {},
+									"IngestionTempTable": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OmniHeaderFooterDataSeperator')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "OmniseperateheaderfooterData",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "OmniheaderFooterManage",
+								"type": "DataFlowReference",
+								"parameters": {
+									"Container": {
+										"value": "'@{pipeline().parameters.Container}'",
+										"type": "Expression"
+									},
+									"Folder": {
+										"value": "'@{pipeline().parameters.Folder}'",
+										"type": "Expression"
+									},
+									"filenameandextension": {
+										"value": "'@{pipeline().parameters.FileNameWithExtension}'",
+										"type": "Expression"
+									}
+								},
+								"datasetParameters": {
+									"omni": {
+										"Container": {
+											"value": "@pipeline().parameters.Container",
+											"type": "Expression"
+										},
+										"Folder": {
+											"value": "@pipeline().parameters.Folder",
+											"type": "Expression"
+										},
+										"FilenameWithExtension": {
+											"value": "@pipeline().parameters.FileNameWithExtension",
+											"type": "Expression"
+										}
+									},
+									"OmniHeaderRow": {},
+									"FooteRow": {},
+									"OmniData": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"parameters": {
+					"Container": {
+						"type": "string"
+					},
+					"Folder": {
+						"type": "string"
+					},
+					"FileNameWithExtension": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-02T18:52:59Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TransormationAndValidation')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ValidationFlow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Transormation Data flow",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "LandingToStagingDataValidation",
+								"type": "DataFlowReference",
+								"parameters": {
+									"FileReceivedID": {
+										"value": "'@{pipeline().parameters.FileReceivedID}'",
+										"type": "Expression"
+									}
+								},
+								"datasetParameters": {
+									"TempStaging": {},
+									"ErrorTableUpdationSSN": {},
+									"LandingTableErrorStatusUpdate": {},
+									"LandingTableStatusValidated": {},
+									"ErrorTableUpdatePhoneNumber": {},
+									"LandingTableValidStatusUpdatePhoneNumber": {},
+									"ErrorTableUpdateGrossEarnings": {},
+									"LandingTableErrorUpdateGrossEarnings": {},
+									"LandingTableStatusUpdateDNDGrossEarnings": {},
+									"ErrorTableUpdatePayPeriodHours": {},
+									"LandingTableStatusUpdatePayPeriodHours": {},
+									"LandingTableUpdatePayPeriodHoursDND": {},
+									"LandingTableStatusUpdateZipDND": {},
+									"LandingTableStatusUpdateZip": {},
+									"ErrorTableUpdateZip": {},
+									"LandingTableUpdateUnionStatusDND": {},
+									"ErrorTableUpdateUnionStatus": {},
+									"LandingTableUpdateUnionStatusError": {},
+									"LadingTableUpdateValidState": {},
+									"ErrorTableUpdateState": {},
+									"LandingTableUpdateErrorState": {},
+									"LandingTableUpdateDNDPayFrequency": {},
+									"ErrorTableUpdatPayFrequency": {},
+									"LandingTableUpdateErrorPayFrequency": {},
+									"LandingTableStatusDNDGender": {},
+									"ErrorTableUpdateGender": {},
+									"LandingTableStatusDNDMaritalStatus": {},
+									"ErrorTableUpdateMaritalStatus": {},
+									"LandingTableStatusErrorMaritalStatus": {},
+									"LandingTableUpdateEMail": {},
+									"ErrorTableUpdateEmail": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "Transormation Data flow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "PretransformAmoutValidation",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "LandingToStagingTransformation",
+								"type": "DataFlowReference",
+								"parameters": {
+									"FileReceivedID": {
+										"value": "'@{pipeline().parameters.FileReceivedID}'",
+										"type": "Expression"
+									}
+								},
+								"datasetParameters": {
+									"LandingTable": {},
+									"GenderEnumeration": {},
+									"MaritalStatusEnumeration": {},
+									"PayFrequencyEnumeration": {},
+									"StateEnumeration": {},
+									"UnionStatusEnumeration": {},
+									"IngestionTempTable": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "CopyFromTempToStaging",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "UpdateStatusInLandingTable",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[SP_Select_Formatted_Data]",
+								"storedProcedureParameters": {
+									"FileReceivedID": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.FileReceivedID",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink"
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "Landing_Contribution_Data_ID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "Landing_Contribution_Data_ID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "File_received_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "File_received_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Inbound_File_Setup_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Inbound_File_Setup_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Company_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Company_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Check_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "Check_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "SSN",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "SSN",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "First_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "First_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Middle_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Middle_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Last_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Last_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Title",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Title",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Employee_ID",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Employee_ID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Gender",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Gender",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Employee_Status",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Employee_Status",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Marital_Status",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Marital_Status",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Division_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Division_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Union_Status",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Union_Status",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Address_1",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Address_1",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Address_2",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Address_2",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "City",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "City",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "State",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "State",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Zip",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Zip",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Birth_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "Birth_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Hire_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "Hire_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Termination_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "Termination_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Rehire_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "Rehire_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Gross_Earnings",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Gross_Earnings",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Pay_Period_Hours",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Pay_Period_Hours",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Employee_Deferral",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Employee_Deferral",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Employee_Roth",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Employee_Roth",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Payments",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Loan_Payments",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Employee_After_Tax",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Employee_After_Tax",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Employer_Match",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Employer_Match",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Safe_Harbor_Match",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Safe_Harbor_Match",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Safe_Harbor_Non_Elective",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Safe_Harbor_Non_Elective",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Qualified_Matching_Contribution",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Qualified_Matching_Contribution",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Qualified_Non_Elective_Contribution",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Qualified_Non_Elective_Contribution",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Profit_Sharing",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Profit_Sharing",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Money_Purchase",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Money_Purchase",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Pay_Frequency",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Pay_Frequency",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Email",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Email",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Phone_Number",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Phone_Number",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Pay_Type",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Pay_Type",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Adjusted_Seniority_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "Adjusted_Seniority_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Leave_Of_Absence_Begin_Date",
+											"type": "DateTime",
+											"physicalType": "datetime"
+										},
+										"sink": {
+											"name": "Leave_Of_Absence_Begin_Date",
+											"type": "DateTime",
+											"physicalType": "datetime"
+										}
+									},
+									{
+										"source": {
+											"name": "Leave_Of_Absence_End_Date",
+											"type": "DateTime",
+											"physicalType": "datetime"
+										},
+										"sink": {
+											"name": "Leave_Of_Absence_End_Date",
+											"type": "DateTime",
+											"physicalType": "datetime"
+										}
+									},
+									{
+										"source": {
+											"name": "Payroll_Begin_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "Payroll_Begin_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Payroll_End_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "Payroll_End_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Cost_Center_1_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Cost_Center_1_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Cost_Center_2_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Cost_Center_2_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Cost_Center_3_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Cost_Center_3_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_Earnings",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_Earnings",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Excluded_Earnings",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Excluded_Earnings",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Section_125",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Section_125",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Additional_Principal_Payments",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Loan_Additional_Principal_Payments",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Number",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "Loan_Number",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "Rollover",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Rollover",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Rollover_Roth",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Rollover_Roth",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "YTD_Gross_Earnings",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "YTD_Gross_Earnings",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Earnings",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Earnings",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Hours",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Hours",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Excluded_Earnings",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Excluded_Earnings",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Section_125",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Plan_YTD_Section_125",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Employee_Deferral",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Employee_Deferral",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Employee_Roth",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Employee_Roth",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Employee_After_Tax",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Employee_After_Tax",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Loan_Payments",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Loan_Payments",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Loan_Number",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "Plan_YTD_Loan_Number",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Employer_Match",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Employer_Match",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Safe_Harbor_Match",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Safe_Harbor_Match",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Qualified_Matching_Contribution",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Qualified_Matching_Contribution",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Safe_Harbor_Non_Elective",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Safe_Harbor_Non_Elective",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Qualified_Non_Elective_Contribution",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Qualified_Non_Elective_Contribution",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Profit_Sharing",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Profit_Sharing",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Money_Purchase",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Money_Purchase",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Rollover",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Rollover",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_YTD_Rollover_Roth",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Plan_YTD_Rollover_Roth",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_ID",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Plan_ID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Plan_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Plan_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Investment_Election",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Investment_Election",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Investment_Change_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "Investment_Change_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Recipient_Vendor_Plan_ID",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Recipient_Vendor_Plan_ID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Detail",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Detail",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Employer_EIN",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Employer_EIN",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Employer_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Employer_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Employer_Plan_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Employer_Plan_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Employer_Sub_Plan_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Employer_Sub_Plan_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Originating_Vendor_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Originating_Vendor_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Originating_Vendor_Sub_Plan_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Originating_Vendor_Sub_Plan_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Recipient_Vendor_Sub_Plan_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Recipient_Vendor_Sub_Plan_ID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Type_of_Account",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Type_of_Account",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "HR_Area_Or_Location_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "HR_Area_Or_Location_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "HR_Sub_Area",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "HR_Sub_Area",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Adjusted_Date_of_Hire",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "Adjusted_Date_of_Hire",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Payroll_Mode",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Payroll_Mode",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Code_1",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Contribution_Source_Code_1",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Amount_1",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Contribution_Source_Amount_1",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Code_2",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Contribution_Source_Code_2",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Amount_2",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Contribution_Source_Amount_2",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Code_3",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Contribution_Source_Code_3",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Amount_3",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Contribution_Source_Amount_3",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Code_4",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Contribution_Source_Code_4",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Amount_4",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Contribution_Source_Amount_4",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Code_5",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Contribution_Source_Code_5",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Amount_5",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Contribution_Source_Amount_5",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Code_6",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Contribution_Source_Code_6",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Amount_6",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Contribution_Source_Amount_6",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Code_7",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Contribution_Source_Code_7",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Amount_7",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Contribution_Source_Amount_7",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Code_8",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Contribution_Source_Code_8",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Source_Amount_8",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Contribution_Source_Amount_8",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Final_Contribution_Indicator",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Final_Contribution_Indicator",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Number_1",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "Loan_Number_1",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Repayment_Amount_1",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Loan_Repayment_Amount_1",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Number_2",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "Loan_Number_2",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Repayment_Amout_2",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Loan_Repayment_Amout_2",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Number_3",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "Loan_Number_3",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Repayment_Amount_3",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Loan_Repayment_Amount_3",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Number_4",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "Loan_Number_4",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Repayment_Amount_4",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Loan_Repayment_Amount_4",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Number_5",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "Loan_Number_5",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Repayment_Amount_5",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Loan_Repayment_Amount_5",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_52",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_52",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_53",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_53",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_54",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_54",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_55",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_55",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_56",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_56",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_57",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_57",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_58",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_58",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_59",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_59",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_60",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_60",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_61",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_61",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_62",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_62",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_63",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_63",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_64",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_64",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_65",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_65",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_66",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_66",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_67",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_67",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_1",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Record_Level_1",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_1_Vendor",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_1_Vendor",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_1_File_Release_Time",
+											"type": "TimeSpan",
+											"physicalType": "time"
+										},
+										"sink": {
+											"name": "Record_Level_1_File_Release_Time",
+											"type": "TimeSpan",
+											"physicalType": "time"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_1_Total_Amount_in_File",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Record_Level_1_Total_Amount_in_File",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_1_Number_of_Contributions",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Record_Level_1_Number_of_Contributions",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_1_Datetime",
+											"type": "DateTime",
+											"physicalType": "datetime"
+										},
+										"sink": {
+											"name": "Record_Level_1_Datetime",
+											"type": "DateTime",
+											"physicalType": "datetime"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_1_Number_of_Participants",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Record_Level_1_Number_of_Participants",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_2",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Record_Level_2",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_2_Plan_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_2_Plan_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_2_Remitter_Plan_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_2_Remitter_Plan_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_2_Column_D",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_2_Column_D",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_2_Column_E",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_2_Column_E",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_2_Payroll_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "Record_Level_2_Payroll_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_2_Total_Amount_in_Plan",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Record_Level_2_Total_Amount_in_Plan",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_2_Number_of_Participants",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Record_Level_2_Number_of_Participants",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_3",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Record_Level_3",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_3_SSN",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_3_SSN",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_3_Last_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_3_Last_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_3_First_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_3_First_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_3_Remitter_Plan_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_3_Remitter_Plan_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_3_Remittance_Type",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_3_Remittance_Type",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_3_Source_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_3_Source_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_3_Number_of_Participants",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Record_Level_3_Number_of_Participants",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_3_Column_I",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_3_Column_I",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_3_Amount",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Record_Level_3_Amount",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_4",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Record_Level_4",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_4_Plan_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_4_Plan_Name",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_4_Remitter_Plan_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_4_Remitter_Plan_Code",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_4_Column_D",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_4_Column_D",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_4_Column_E",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_4_Column_E",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_4_Payroll_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "Record_Level_4_Payroll_Date",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_4_Total_Amount_in_Plan",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Record_Level_4_Total_Amount_in_Plan",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_4_Number_of_Participants",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Record_Level_4_Number_of_Participants",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_5",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Record_Level_5",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_5_Vendor",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Record_Level_5_Vendor",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_5_File_Release_Time",
+											"type": "TimeSpan",
+											"physicalType": "time"
+										},
+										"sink": {
+											"name": "Record_Level_5_File_Release_Time",
+											"type": "TimeSpan",
+											"physicalType": "time"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_5_Total_Amount_in_File",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Record_Level_5_Total_Amount_in_File",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_5_Number_of_Contributions",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Record_Level_5_Number_of_Contributions",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_5_Datetime",
+											"type": "DateTime",
+											"physicalType": "datetime"
+										},
+										"sink": {
+											"name": "Record_Level_5_Datetime",
+											"type": "DateTime",
+											"physicalType": "datetime"
+										}
+									},
+									{
+										"source": {
+											"name": "Record_Level_5_Number_of_Participants",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Record_Level_5_Number_of_Participants",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Remittance_Type",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Remittance_Type",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Contribution_Rate",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Contribution_Rate",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Loan_Balance",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										},
+										"sink": {
+											"name": "Loan_Balance",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Comments",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Comments",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Header_Column_1",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Header_Column_1",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Header_Column_2",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Header_Column_2",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Header_Column_3",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Header_Column_3",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Header_Column_4",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Header_Column_4",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Header_Column_5",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Header_Column_5",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Header_Column_6",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Header_Column_6",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Header_Column_7",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Header_Column_7",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Header_Column_8",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Header_Column_8",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Header_Column_9",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Header_Column_9",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Header_Column_10",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Header_Column_10",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Footer_Column_1",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Footer_Column_1",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Footer_Column_2",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Footer_Column_2",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Footer_Column_3",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Footer_Column_3",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Footer_Column_4",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Footer_Column_4",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Footer_Column_5",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Footer_Column_5",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Footer_Column_6",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Footer_Column_6",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Footer_Column_7",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Footer_Column_7",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Footer_Column_8",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Footer_Column_8",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Footer_Column_9",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Footer_Column_9",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Footer_Column_10",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Footer_Column_10",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_50",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_50",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "OMNI_Field_51",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "OMNI_Field_51",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "PAYLOCITY_Field_71",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "PAYLOCITY_Field_71",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "PAYLOCITY_Field_72",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "PAYLOCITY_Field_72",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "PAYLOCITY_Field_73",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "PAYLOCITY_Field_73",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "PAYLOCITY_Field_74",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "PAYLOCITY_Field_74",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Status",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Status",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AzureSqlIngestionTable",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "StagingIngestionTable",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "DeleteDataFromTempStaging",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "CopyFromTempToStaging",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[SP_Clean_Staging_Temp_Data]",
+								"storedProcedureParameters": {
+									"FileReceivedID": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.FileReceivedID",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "StagingIngestionTempTable",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "UpdateStatusInLandingTable",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "ValidationFlow",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[SP_LandingTable_Status_Update]",
+								"storedProcedureParameters": {
+									"filereceivedID": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.FileReceivedID",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlIngestionTable",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "PretransformAmoutValidation",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[SP_PreTransform_Validations]",
+								"storedProcedureParameters": {
+									"filereceivedID": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.FileReceivedID",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlIngestionTable",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"parameters": {
+					"FileReceivedID": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/With Header Excel Or CSV')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExcelOrCsv with column header",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@or(equals(pipeline().parameters.ExcelOrCsv,'csv'),equals(pipeline().parameters.ExcelOrCsv,'txt'))",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Execute Pipeline Excel",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "DynamicamappingXLS",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"inboundsourcesetupid": {
+												"value": "@pipeline().parameters.InboundSourceSetupID",
+												"type": "Expression"
+											},
+											"filereceivedid": {
+												"value": "@pipeline().parameters.FileReceivedID",
+												"type": "Expression"
+											},
+											"FileVendorID": {
+												"value": "@pipeline().parameters.FileVendorID",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											},
+											"folder": {
+												"value": "@pipeline().parameters.folder",
+												"type": "Expression"
+											},
+											"Sheet": {
+												"value": "@pipeline().parameters.sheet",
+												"type": "Expression"
+											},
+											"filenamewithextension": {
+												"value": "@pipeline().parameters.Filenamewithextension",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Execute Pipeline Delimited",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "DelimitedDynamicmapping",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"FileVendorID": {
+												"value": "@pipeline().parameters.FileVendorID",
+												"type": "Expression"
+											},
+											"InboundSourceSetupID": {
+												"value": "@pipeline().parameters.InboundSourceSetupID",
+												"type": "Expression"
+											},
+											"FileReceivedID": {
+												"value": "@pipeline().parameters.FileReceivedID",
+												"type": "Expression"
+											},
+											"delimiter": {
+												"value": "@pipeline().parameters.delimiter",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											},
+											"folder": {
+												"value": "@pipeline().parameters.folder",
+												"type": "Expression"
+											},
+											"filenamewithextension": {
+												"value": "@pipeline().parameters.Filenamewithextension",
+												"type": "Expression"
+											},
+											"dataHeaderRowNumber": {
+												"value": "@pipeline().parameters.DataHeaderRowNumber",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"ExcelOrCsv": {
+						"type": "string"
+					},
+					"Container": {
+						"type": "string"
+					},
+					"folder": {
+						"type": "string"
+					},
+					"filenamewithextension": {
+						"type": "string"
+					},
+					"sheet": {
+						"type": "string"
+					},
+					"InboundSourceSetupID": {
+						"type": "string"
+					},
+					"FileReceivedID": {
+						"type": "string"
+					},
+					"FileVendorID": {
+						"type": "string"
+					},
+					"Delimiter": {
+						"type": "string"
+					},
+					"DataHeaderRowNumber": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-10T18:08:05Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/flattenDataFlow')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "voyaDataflow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "voyaDataflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"VoyaJsonDataFlow": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"annotations": [],
+				"lastPublishTime": "2021-01-14T09:28:54Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TriggerForADFInsertFileReceivedReliusPaylocity')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "TriggerForADFInsertFileReceivedReliusPaylocity",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PipelineReliusPaylocity",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"FileName": "[parameters('TriggerForADFInsertFileReceivedReliusPaylocity_properties_PipelineReliusPaylocity_parameters_FileName')]",
+							"FilePath": "[parameters('TriggerForADFInsertFileReceivedReliusPaylocity_properties_PipelineReliusPaylocity_parameters_FilePath')]"
+						}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/relius/blobs/paylocity/",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('TriggerForADFInsertFileReceivedReliusPaylocity_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExcelCSVNonHierarchical')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "column header Available switch",
+						"type": "Switch",
+						"dependsOn": [
+							{
+								"activity": "Set Coulmn Header Value",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"on": {
+								"value": "@variables('ColumnHeaderAvailable')",
+								"type": "Expression"
+							},
+							"cases": [
+								{
+									"value": "Y",
+									"activities": [
+										{
+											"name": "Execute With Header Excel Or CSV",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "With Header Excel Or CSV",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"ExcelOrCsv": {
+														"value": "@pipeline().parameters.ExcelOrCsv",
+														"type": "Expression"
+													},
+													"Container": {
+														"value": "@pipeline().parameters.container",
+														"type": "Expression"
+													},
+													"folder": {
+														"value": "@pipeline().parameters.folder",
+														"type": "Expression"
+													},
+													"filenamewithextension": {
+														"value": "@pipeline().parameters.Filenamewithextension",
+														"type": "Expression"
+													},
+													"sheet": {
+														"value": "@pipeline().parameters.sheet",
+														"type": "Expression"
+													},
+													"InboundSourceSetupID": {
+														"value": "@pipeline().parameters.InboundSourceSetupID",
+														"type": "Expression"
+													},
+													"FileReceivedID": {
+														"value": "@pipeline().parameters.FileReceivedID",
+														"type": "Expression"
+													},
+													"FileVendorID": {
+														"value": "@pipeline().parameters.FileVendorID",
+														"type": "Expression"
+													},
+													"Delimiter": {
+														"value": "@pipeline().parameters.delimiter",
+														"type": "Expression"
+													},
+													"DataHeaderRowNumber": {
+														"value": "@pipeline().parameters.DataHeaderRowNmber",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								}
+							],
+							"defaultActivities": [
+								{
+									"name": "Headerless Excel Or CSV",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Headerless Excel OR CSV",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"ExcelOrCSV": {
+												"value": "@pipeline().parameters.ExcelOrCsv",
+												"type": "Expression"
+											},
+											"Folder": {
+												"value": "@pipeline().parameters.folder",
+												"type": "Expression"
+											},
+											"Container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											},
+											"Sheet": {
+												"value": "@pipeline().parameters.sheet",
+												"type": "Expression"
+											},
+											"FileReceivedID": {
+												"value": "@pipeline().parameters.FileReceivedID",
+												"type": "Expression"
+											},
+											"FileNameWITHExtension": {
+												"value": "@pipeline().parameters.Filenamewithextension",
+												"type": "Expression"
+											},
+											"FileVendorID": {
+												"value": "@pipeline().parameters.FileVendorID",
+												"type": "Expression"
+											},
+											"InboundSourceSetupID": {
+												"value": "@pipeline().parameters.InboundSourceSetupID",
+												"type": "Expression"
+											},
+											"Delimiter": {
+												"value": "@pipeline().parameters.delimiter",
+												"type": "Expression"
+											},
+											"DataHeaderRowNumber": {
+												"value": "@pipeline().parameters.DataHeaderRowNmber",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Check Column Header Available",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[Sp_IsHierarchicalData]",
+								"storedProcedureParameters": {
+									"ColumnHeaderAvailable": {
+										"type": "String",
+										"value": null
+									},
+									"inboundSourceSetupID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.InboundSourceSetupID",
+											"type": "Expression"
+										}
+									},
+									"isHierarchy": {
+										"type": "String",
+										"value": null
+									},
+									"PayrollProviderCode": {
+										"type": "String",
+										"value": null
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "Set Coulmn Header Value",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Check Column Header Available",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ColumnHeaderAvailable",
+							"value": {
+								"value": "@activity('Check Column Header Available').output.firstRow.ColumnHeaderAvailable",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"ExcelOrCsv": {
+						"type": "String",
+						"defaultValue": "csv"
+					},
+					"delimiter": {
+						"type": "string"
+					},
+					"folder": {
+						"type": "string"
+					},
+					"container": {
+						"type": "string"
+					},
+					"Filenamewithextension": {
+						"type": "string"
+					},
+					"sheet": {
+						"type": "string"
+					},
+					"InboundSourceSetupID": {
+						"type": "string"
+					},
+					"FileVendorID": {
+						"type": "string"
+					},
+					"FileReceivedID": {
+						"type": "string"
+					},
+					"DataHeaderRowNmber": {
+						"type": "int"
+					}
+				},
+				"variables": {
+					"ColumnHeaderAvailable": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-10T18:08:07Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Headerless Excel OR CSV')]",
+				"[concat(variables('factoryId'), '/pipelines/With Header Excel Or CSV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OmniBlobtoLanding')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "OmniHeaderFooterDataSeperator",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "OmniHeaderFooterDataSeperator",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Container": {
+									"value": "@pipeline().parameters.Container",
+									"type": "Expression"
+								},
+								"Folder": {
+									"value": "@pipeline().parameters.Folder",
+									"type": "Expression"
+								},
+								"FileNameWithExtension": {
+									"value": "@pipeline().parameters.FileNameWithExtension",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ConsolidateHeaderFooter",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "OmniHeaderFooterDataSeperator",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "CombineOmniDataHeaderFooter",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"InboundSourceSetupID": {
+									"value": "@pipeline().parameters.InboundSourceSetupID",
+									"type": "Expression"
+								},
+								"FileReceivedID": {
+									"value": "@pipeline().parameters.FileReceivedID",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "DynamicMapping",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "ConsolidateHeaderFooter",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[sp_getColumnMapping]",
+								"storedProcedureParameters": {
+									"inboundSourceSetupID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.InboundSourceSetupID",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "CopyOmniData",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "DynamicMapping",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink"
+							},
+							"enableStaging": false,
+							"translator": {
+								"value": "@json(activity('DynamicMapping').output.firstRow.json_output)",
+								"type": "Expression"
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "OmniFinalSource",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AzureSqlIngestionTable",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"parameters": {
+					"InboundSourceSetupID": {
+						"type": "int"
+					},
+					"FileReceivedID": {
+						"type": "int"
+					},
+					"Container": {
+						"type": "string"
+					},
+					"Folder": {
+						"type": "string"
+					},
+					"FileNameWithExtension": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-02T18:53:00Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/OmniHeaderFooterDataSeperator')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExcelCSVHierarchical')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get PayrollProviderCode",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[Sp_IsHierarchicalData]",
+								"storedProcedureParameters": {
+									"inboundSourceSetupID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.inboundsourcesetupID",
+											"type": "Expression"
+										}
+									},
+									"isHierarchy": {
+										"type": "String",
+										"value": null
+									},
+									"PayrollProviderCode": {
+										"type": "String",
+										"value": null
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "PayrollProviderCode",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get PayrollProviderCode",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "PayrollProviderCode",
+							"value": {
+								"value": "@activity('Get PayrollProviderCode').output.firstRow.PayrollProviderCode",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Select payroll Provider",
+						"type": "Switch",
+						"dependsOn": [
+							{
+								"activity": "PayrollProviderCode",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"on": {
+								"value": "@variables('PayrollProviderCode')",
+								"type": "Expression"
+							},
+							"cases": [
+								{
+									"value": "OMNI",
+									"activities": [
+										{
+											"name": "OmniFlow",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "OmniBlobtoLanding",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"InboundSourceSetupID": {
+														"value": "@pipeline().parameters.inboundsourcesetupID",
+														"type": "Expression"
+													},
+													"FileReceivedID": {
+														"value": "@pipeline().parameters.filerecievedID",
+														"type": "Expression"
+													},
+													"Container": {
+														"value": "@pipeline().parameters.container",
+														"type": "Expression"
+													},
+													"Folder": {
+														"value": "@pipeline().parameters.folder",
+														"type": "Expression"
+													},
+													"FileNameWithExtension": {
+														"value": "@pipeline().parameters.filenamewithextension",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								}
+							],
+							"defaultActivities": [
+								{
+									"name": "Flatten Voya csv",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "DataflowCopy",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"file_name": {
+												"value": "@pipeline().parameters.filenamewithextension",
+												"type": "Expression"
+											},
+											"container_name": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											},
+											"folder_name": {
+												"value": "@pipeline().parameters.folder",
+												"type": "Expression"
+											},
+											"file_received_id": {
+												"value": "@pipeline().parameters.filerecievedID",
+												"type": "Expression"
+											},
+											"lookup_proc_result": {
+												"value": "@pipeline().parameters.lookupProcResult",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "DynamicMappingLookup",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "Flatten Voya csv",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderStoredProcedureName": "[[dbo].[sp_getColumnMapping]",
+											"storedProcedureParameters": {
+												"inboundSourceSetupID": {
+													"type": "Int32",
+													"value": {
+														"value": "@pipeline().parameters.inboundsourcesetupID",
+														"type": "Expression"
+													}
+												}
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "AzureSqlTable1",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								},
+								{
+									"name": "Copy data voya csv",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "DynamicMappingLookup",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"additionalColumns": [
+												{
+													"name": "InboundSourceSetupID",
+													"value": {
+														"value": "@string(pipeline().parameters.inboundsourcesetupID)",
+														"type": "Expression"
+													}
+												},
+												{
+													"name": "FileReceivedID",
+													"value": {
+														"value": "@string(pipeline().parameters.filerecievedID)",
+														"type": "Expression"
+													}
+												}
+											],
+											"sqlReaderQuery": {
+												"value": "@concat('select \n   c.rowno\tas \tProp_0 ,\nc.column2\tas \tProp_1 ,\nc.column3\tas \tProp_2 ,\nc.column4\tas \tProp_3 ,\nc.column5\tas \tProp_4 ,\nc.column6\tas \tProp_5 ,\nc.column7\tas \tProp_6 ,\nb.rowno\tas \tProp_7\t   ,\nb.column2\tas \tProp_8 ,\nb.column3\tas \tProp_9 ,\nb.column4\tas \tProp_10,\nb.column5\tas \tProp_11,\nb.column6\tas \tProp_12,\nb.column7\tas \tProp_13,\nb.column8\tas \tProp_14,\na.rowno\tas \tProp_15\t   ,\na.column2\tas \tProp_16,\na.column3\tas \tProp_17,\na.column4\tas \tProp_18,\na.column5\tas \tProp_19,\na.column6\tas \tProp_20,\na.column7\tas \tProp_21,\na.column8\tas \tProp_22,\na.column9\tas \tProp_23,\na.column10\tas \tProp_24,\ne.rowno\tas \tProp_25\t   ,\ne.column2\tas \tProp_26,\ne.column3\tas \tProp_27,\ne.column4\tas \tProp_28,\ne.column5\tas \tProp_29,\ne.column6\tas \tProp_30,\ne.column7\tas \tProp_31,\ne.column8\tas \tProp_32,\nd.rowno\tas \tProp_33\t   ,\nd.column2\tas \tProp_34,\nd.column3\tas \tProp_35,\nd.column4\tas \tProp_36,\nd.column5\tas \tProp_37,\nd.column6\tas \tProp_38,\nd.column7\tas \tProp_39\n\n\nfrom dbo.tbl_voya a,dbo.tbl_voya b,dbo.tbl_voya c,dbo.tbl_voya d,dbo.tbl_voya e\nwhere a.rowno =3\nand a.parentid = b.rowno\nand b.rowno =2\nand c.rowno=1\nand d.rowno=5\nand e.rowno=4\nand a.setno = b.setno\nand c.setno = 0\nand b.parentid = c.rowno\nand d.setno = 0\nand e.parentid = c.rowno\nand a.setno = e.setno\nand a.file_received_id = b.file_received_id \nand b.file_received_id = c.file_received_id \nand c.file_received_id = d.file_received_id \nand d.file_received_id = e.file_received_id\nand a.file_received_id =',string(pipeline().parameters.filerecievedID))",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "AzureSqlSink"
+										},
+										"enableStaging": false,
+										"translator": {
+											"value": "@json(activity('DynamicMappingLookup').output.firstRow.json_output)",
+											"type": "Expression"
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "AzureSqlTable1",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AzureSqlIngestionTable",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"ExcelOrCsv": {
+						"type": "string"
+					},
+					"delimiter": {
+						"type": "string"
+					},
+					"folder": {
+						"type": "string"
+					},
+					"container": {
+						"type": "string"
+					},
+					"filenamewithextension": {
+						"type": "string"
+					},
+					"sheet": {
+						"type": "string"
+					},
+					"inboundsourcesetupID": {
+						"type": "int"
+					},
+					"filerecievedID": {
+						"type": "int"
+					},
+					"lookupProcResult": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"PayrollProviderCode": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-04T16:56:49Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/DataflowCopy')]",
+				"[concat(variables('factoryId'), '/pipelines/OmniBlobtoLanding')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Check Hierarchy')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Is Hierarchical",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "checkHierarchy",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('checkHierarchy').output.firstRow.IsHierarchy,'Y')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Execute Non Hierarchical Pipeline",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExcelCSVNonHierarchical",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"ExcelOrCsv": {
+												"value": "@pipeline().parameters.ExcelOrCsv",
+												"type": "Expression"
+											},
+											"delimiter": {
+												"value": "@pipeline().parameters.delimiter",
+												"type": "Expression"
+											},
+											"folder": {
+												"value": "@pipeline().parameters.folder",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											},
+											"Filenamewithextension": {
+												"value": "@pipeline().parameters.Filenamewithextension",
+												"type": "Expression"
+											},
+											"sheet": {
+												"value": "@pipeline().parameters.sheet",
+												"type": "Expression"
+											},
+											"InboundSourceSetupID": {
+												"value": "@pipeline().parameters.InboundSourceSetupID",
+												"type": "Expression"
+											},
+											"FileVendorID": {
+												"value": "@pipeline().parameters.FileVendorID",
+												"type": "Expression"
+											},
+											"FileReceivedID": {
+												"value": "@pipeline().parameters.FileReceivedID",
+												"type": "Expression"
+											},
+											"DataHeaderRowNmber": {
+												"value": "@pipeline().parameters.HeaderRowNumber",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "MoveErrorfileNonHierarchical",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Execute Non Hierarchical Pipeline",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ErrorBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "ErrorFileDelete",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "MoveErrorfileNonHierarchical",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								},
+								{
+									"name": "ERRORStatusUpdate",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "ErrorFileDelete",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderStoredProcedureName": "[[dbo].[SP_File_Process_Status]",
+											"storedProcedureParameters": {
+												"File_Received_ID": {
+													"type": "Int32",
+													"value": {
+														"value": "@pipeline().parameters.FileReceivedID",
+														"type": "Expression"
+													}
+												},
+												"Status": {
+													"type": "String",
+													"value": "ERROR"
+												}
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "AzureSqlTable1",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								},
+								{
+									"name": "MoveSuccessFileNonHierarchical",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Execute Non Hierarchical Pipeline",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "SuccessBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												},
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "ArchivedFileDelete",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "MoveSuccessFileNonHierarchical",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								},
+								{
+									"name": "ProcessedUpdateStatus",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "ArchivedFileDelete",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderStoredProcedureName": "[[dbo].[SP_File_Process_Status]",
+											"storedProcedureParameters": {
+												"File_Received_ID": {
+													"type": "Int32",
+													"value": {
+														"value": "@pipeline().parameters.FileReceivedID",
+														"type": "Expression"
+													}
+												},
+												"Status": {
+													"type": "String",
+													"value": "PROCESSED"
+												}
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "AzureSqlTable1",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Execute hierarchical pipeline",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExcelCSVHierarchical",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"ExcelOrCsv": {
+												"value": "@pipeline().parameters.ExcelOrCsv",
+												"type": "Expression"
+											},
+											"delimiter": {
+												"value": "@pipeline().parameters.delimiter",
+												"type": "Expression"
+											},
+											"folder": {
+												"value": "@pipeline().parameters.folder",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											},
+											"filenamewithextension": {
+												"value": "@pipeline().parameters.Filenamewithextension",
+												"type": "Expression"
+											},
+											"sheet": {
+												"value": "@pipeline().parameters.sheet",
+												"type": "Expression"
+											},
+											"inboundsourcesetupID": {
+												"value": "@pipeline().parameters.InboundSourceSetupID",
+												"type": "Expression"
+											},
+											"filerecievedID": {
+												"value": "@pipeline().parameters.FileReceivedID",
+												"type": "Expression"
+											},
+											"lookupProcResult": {
+												"value": "@pipeline().parameters.lookupProcResult",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "MoveErrorFileHierarchicalData",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Execute hierarchical pipeline",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ErrorBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "ErrorFileDeleteHierarchical",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "MoveErrorFileHierarchicalData",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								},
+								{
+									"name": "ERRORStatusUpdateHierarchical",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "ErrorFileDeleteHierarchical",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderStoredProcedureName": "[[dbo].[SP_File_Process_Status]",
+											"storedProcedureParameters": {
+												"File_Received_ID": {
+													"type": "Int32",
+													"value": {
+														"value": "@pipeline().parameters.FileReceivedID",
+														"type": "Expression"
+													}
+												},
+												"Status": {
+													"type": "String",
+													"value": "ERROR"
+												}
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "AzureSqlTable1",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								},
+								{
+									"name": "MoveSuccessFileHierarchicalData",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Execute hierarchical pipeline",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "SuccessBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												},
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "ArchivedFileDeleteHierarchical",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "MoveSuccessFileHierarchicalData",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								},
+								{
+									"name": "ProcessedUpdateStatusHierarchical",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "ArchivedFileDeleteHierarchical",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderStoredProcedureName": "[[dbo].[SP_File_Process_Status]",
+											"storedProcedureParameters": {
+												"File_Received_ID": {
+													"type": "Int32",
+													"value": {
+														"value": "@pipeline().parameters.FileReceivedID",
+														"type": "Expression"
+													}
+												},
+												"Status": {
+													"type": "String",
+													"value": "PROCESSED"
+												}
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "AzureSqlTable1",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "checkHierarchy",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[Sp_IsHierarchicalData]",
+								"storedProcedureParameters": {
+									"inboundSourceSetupID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.InboundSourceSetupID",
+											"type": "Expression"
+										}
+									},
+									"isHierarchy": {
+										"type": "String",
+										"value": null
+									},
+									"PayrollProviderCode": {
+										"type": "String",
+										"value": null
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"parameters": {
+					"ExcelOrCsv": {
+						"type": "String",
+						"defaultValue": "csv"
+					},
+					"delimiter": {
+						"type": "string"
+					},
+					"folder": {
+						"type": "string"
+					},
+					"container": {
+						"type": "string"
+					},
+					"Filenamewithextension": {
+						"type": "string"
+					},
+					"sheet": {
+						"type": "string",
+						"defaultValue": "sheet1"
+					},
+					"InboundSourceSetupID": {
+						"type": "int"
+					},
+					"FileVendorID": {
+						"type": "string",
+						"defaultValue": "1234"
+					},
+					"FileReceivedID": {
+						"type": "string"
+					},
+					"lookupProcResult": {
+						"type": "string",
+						"defaultValue": "0"
+					},
+					"HeaderRowNumber": {
+						"type": "int"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-04T07:27:50Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/ExcelCSVNonHierarchical')]",
+				"[concat(variables('factoryId'), '/pipelines/ExcelCSVHierarchical')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ConsolidatedPipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "ConsolidatedPipeline",
+				"activities": [
+					{
+						"name": "CompareTriggerPathNameForErrorOrArchieve",
+						"description": "CompareTriggerPathNameForErrorOrArchieve",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "LookupCheckCorrectFolderPathForFileInsert",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('LookupCheckCorrectFolderPathForFileInsert').output.firstRow.Result,1)",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "SetFilePathHasErrorOrArchiveTrue",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FilePathHasErrorOrArchive",
+										"value": true
+									}
+								},
+								{
+									"name": "SetOutputFromStoredProcedure2",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "SetFilePathHasErrorOrArchiveTrue",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "OutputFromStoredProcedure",
+										"value": "2"
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "SetFilePathHasErrorOrArchiveFalse",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FilePathHasErrorOrArchive",
+										"value": false
+									}
+								},
+								{
+									"name": "LookupForSP_InsertIntoFileReceived",
+									"description": "LookupForSP_InsertIntoFileReceived",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "SetFilePathHasErrorOrArchiveFalse",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderStoredProcedureName": "[[dbo].[SP_InsertIntoFileReceived]",
+											"storedProcedureParameters": {
+												"ActualFile": {
+													"type": "String",
+													"value": null
+												},
+												"ContainerName": {
+													"type": "String",
+													"value": "NA"
+												},
+												"Delimiter": {
+													"type": "String",
+													"value": "NA"
+												},
+												"EmailId": {
+													"type": "String",
+													"value": null
+												},
+												"FileName": {
+													"type": "String",
+													"value": {
+														"value": "@pipeline().parameters.FileName",
+														"type": "Expression"
+													}
+												},
+												"FileNameExtension": {
+													"type": "String",
+													"value": "NA"
+												},
+												"FileReceivedId": {
+													"type": "Int32",
+													"value": "0"
+												},
+												"FileType": {
+													"type": "Int32",
+													"value": null
+												},
+												"FolderName": {
+													"type": "String",
+													"value": {
+														"value": "@variables('FolderName')",
+														"type": "Expression"
+													}
+												},
+												"InboundSourceSetupId": {
+													"type": "Int32",
+													"value": "0"
+												},
+												"IngestionType": {
+													"type": "Int32",
+													"value": null
+												},
+												"IsColumnHeaderAvailable": {
+													"type": "String",
+													"value": "NA"
+												},
+												"Result": {
+													"type": "Int32",
+													"value": "0"
+												},
+												"SheetName": {
+													"type": "String",
+													"value": "NA"
+												},
+												"SourceProviderName": {
+													"type": "String",
+													"value": null
+												},
+												"StorageLink": {
+													"type": "String",
+													"value": {
+														"value": "@pipeline().parameters.FilePath",
+														"type": "Expression"
+													}
+												},
+												"UserName": {
+													"type": "String",
+													"value": null
+												},
+												"DataHeaderRow": {
+													"type": "Int32",
+													"value": "0"
+												}
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "AzureSqlTable1",
+											"type": "DatasetReference",
+											"parameters": {}
+										},
+										"firstRowOnly": false
+									}
+								},
+								{
+									"name": "SetOutputFromStoredProcedure",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "OutputFromStoredProcedure",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].Result)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetFileReceivedID",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FileReceivedID",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].FileReceivedID)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetInboundSourceSetupID",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "InboundSourceSetupID",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].InboundSourceSetupID)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetFileExtension",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FileExtension",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].FileExtension)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetContainerName",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ContainerName",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].ContainerName)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetSheetName",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "SheetName",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].SheetName)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetFolderName",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FolderName",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].FolderName)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetDataHeaderRow",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "DataHeaderRow",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].DataHeaderRow)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetDelimiter",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "Delimiter",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].Delimiter)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "LookupCheckCorrectFolderPathForFileInsert",
+						"description": "LookupCheckCorrectFolderPathForFileInsert",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[SP_CheckCorrectFolderPathForFileInsert]",
+								"storedProcedureParameters": {
+									"FolderPath": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.FilePath",
+											"type": "Expression"
+										}
+									},
+									"Result": {
+										"type": "Int32",
+										"value": "0"
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "SwitchResultOutputOfSP",
+						"type": "Switch",
+						"dependsOn": [
+							{
+								"activity": "CompareTriggerPathNameForErrorOrArchieve",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"on": {
+								"value": "@variables('OutputFromStoredProcedure')",
+								"type": "Expression"
+							},
+							"cases": [
+								{
+									"value": "0",
+									"activities": [
+										{
+											"name": "CopydataFromFilePath",
+											"description": "CopydataFromFilePath",
+											"type": "Copy",
+											"dependsOn": [],
+											"policy": {
+												"timeout": "7.00:00:00",
+												"retry": 0,
+												"retryIntervalInSeconds": 30,
+												"secureOutput": false,
+												"secureInput": false
+											},
+											"userProperties": [],
+											"typeProperties": {
+												"source": {
+													"type": "DelimitedTextSource",
+													"storeSettings": {
+														"type": "AzureBlobStorageReadSettings",
+														"recursive": false,
+														"enablePartitionDiscovery": false
+													},
+													"formatSettings": {
+														"type": "DelimitedTextReadSettings"
+													}
+												},
+												"sink": {
+													"type": "DelimitedTextSink",
+													"storeSettings": {
+														"type": "AzureBlobStorageWriteSettings"
+													},
+													"formatSettings": {
+														"type": "DelimitedTextWriteSettings",
+														"quoteAllText": true,
+														"fileExtension": ".txt"
+													}
+												},
+												"enableStaging": false,
+												"translator": {
+													"type": "TabularTranslator",
+													"typeConversion": true,
+													"typeConversionSettings": {
+														"allowDataTruncation": true,
+														"treatBooleanAsNumber": false
+													}
+												}
+											},
+											"inputs": [
+												{
+													"referenceName": "SourceBlobPath",
+													"type": "DatasetReference",
+													"parameters": {
+														"FileName": {
+															"value": "@pipeline().parameters.FileName",
+															"type": "Expression"
+														},
+														"FilePath": {
+															"value": "@pipeline().parameters.FilePath",
+															"type": "Expression"
+														}
+													}
+												}
+											],
+											"outputs": [
+												{
+													"referenceName": "ErrorBlobPath",
+													"type": "DatasetReference",
+													"parameters": {
+														"FileName": {
+															"value": "@pipeline().parameters.FileName",
+															"type": "Expression"
+														},
+														"FilePath": {
+															"value": "@pipeline().parameters.FilePath",
+															"type": "Expression"
+														}
+													}
+												}
+											]
+										},
+										{
+											"name": "DeleteSourceFile",
+											"description": "DeleteSourceFile",
+											"type": "Delete",
+											"dependsOn": [
+												{
+													"activity": "CopydataFromFilePath",
+													"dependencyConditions": [
+														"Succeeded"
+													]
+												}
+											],
+											"policy": {
+												"timeout": "7.00:00:00",
+												"retry": 0,
+												"retryIntervalInSeconds": 30,
+												"secureOutput": false,
+												"secureInput": false
+											},
+											"userProperties": [],
+											"typeProperties": {
+												"dataset": {
+													"referenceName": "SourceBlobPath",
+													"type": "DatasetReference",
+													"parameters": {
+														"FileName": {
+															"value": "@pipeline().parameters.FileName",
+															"type": "Expression"
+														},
+														"FilePath": {
+															"value": "@pipeline().parameters.FilePath",
+															"type": "Expression"
+														}
+													}
+												},
+												"enableLogging": false,
+												"storeSettings": {
+													"type": "AzureBlobStorageReadSettings",
+													"recursive": false,
+													"enablePartitionDiscovery": false
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "1",
+									"activities": [
+										{
+											"name": "Data Ingestion",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "Check Hierarchy",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"ExcelOrCsv": {
+														"value": "@variables('FileExtension')",
+														"type": "Expression"
+													},
+													"delimiter": {
+														"value": "@variables('Delimiter')",
+														"type": "Expression"
+													},
+													"folder": {
+														"value": "@variables('FolderName')",
+														"type": "Expression"
+													},
+													"container": {
+														"value": "@variables('ContainerName')",
+														"type": "Expression"
+													},
+													"Filenamewithextension": {
+														"value": "@pipeline().parameters.FileName",
+														"type": "Expression"
+													},
+													"sheet": {
+														"value": "@variables('SheetName')",
+														"type": "Expression"
+													},
+													"InboundSourceSetupID": {
+														"value": "@variables('InboundSourceSetupID')",
+														"type": "Expression"
+													},
+													"FileReceivedID": {
+														"value": "@variables('FileReceivedID')",
+														"type": "Expression"
+													},
+													"HeaderRowNumber": {
+														"value": "@variables('DataHeaderRow')",
+														"type": "Expression"
+													}
+												}
+											}
+										},
+										{
+											"name": "Data Transformation And Validation",
+											"type": "ExecutePipeline",
+											"dependsOn": [
+												{
+													"activity": "Data Ingestion",
+													"dependencyConditions": [
+														"Succeeded"
+													]
+												}
+											],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "TransormationAndValidation",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"FileReceivedID": {
+														"value": "@variables('FileReceivedID')",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "2",
+									"activities": [
+										{
+											"name": "SetSwitch2",
+											"type": "SetVariable",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"variableName": "Switch",
+												"value": "'2'"
+											}
+										}
+									]
+								}
+							],
+							"defaultActivities": [
+								{
+									"name": "SetDefaultSwitch",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "Switch",
+										"value": "'Default'"
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					},
+					"FilePath": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"FilePathHasErrorOrArchive": {
+						"type": "Boolean"
+					},
+					"OutputFromStoredProcedure": {
+						"type": "String"
+					},
+					"FileReceivedID": {
+						"type": "String",
+						"defaultValue": "0"
+					},
+					"InboundSourceSetupID": {
+						"type": "String",
+						"defaultValue": "0"
+					},
+					"Delimiter": {
+						"type": "String"
+					},
+					"FileExtension": {
+						"type": "String",
+						"defaultValue": "NA"
+					},
+					"SheetName": {
+						"type": "String",
+						"defaultValue": "NA"
+					},
+					"FolderName": {
+						"type": "String",
+						"defaultValue": "NA"
+					},
+					"ContainerName": {
+						"type": "String",
+						"defaultValue": "NA"
+					},
+					"Switch": {
+						"type": "String",
+						"defaultValue": "NA"
+					},
+					"DataHeaderRow": {
+						"type": "String",
+						"defaultValue": "0"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-12T04:56:17Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Check Hierarchy')]",
+				"[concat(variables('factoryId'), '/pipelines/TransormationAndValidation')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ConsolidatedADFTrigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "ConsolidatedADFTrigger",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "ConsolidatedPipeline",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"FileName": "[parameters('ConsolidatedADFTrigger_properties_ConsolidatedPipeline_parameters_FileName')]",
+							"FilePath": "[parameters('ConsolidatedADFTrigger_properties_ConsolidatedPipeline_parameters_FilePath')]"
+						}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/relius/blobs/",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('ConsolidatedADFTrigger_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/ConsolidatedPipeline')]"
+			]
+		}
+	]
+}

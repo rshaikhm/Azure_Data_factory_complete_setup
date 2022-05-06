@@ -1,0 +1,1060 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "pcs-adf-payroll360-dev"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LandingToStagingTransformation')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "AzureSqlIngestionTable",
+								"type": "DatasetReference"
+							},
+							"name": "LandingTable"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "StagingIngestionTempTable",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "DerivedColumnDecimls"
+						},
+						{
+							"name": "DerivedColumnDecimals2"
+						},
+						{
+							"name": "DerivedColumnDates"
+						}
+					],
+					"script": "source(output(\n\t\tLanding_Contribution_Data_ID as long,\n\t\tFile_received_ID as integer,\n\t\tInbound_File_Setup_ID as integer,\n\t\tPaylocity_Company_Code as string,\n\t\tCheck_Date as string,\n\t\tSSN as string,\n\t\tFirst_Name as string,\n\t\tMiddle_Name as string,\n\t\tLast_Name as string,\n\t\tTitle as string,\n\t\tEmployee_ID as string,\n\t\tGender as string,\n\t\tEmployee_Status as string,\n\t\tMarital_Status as string,\n\t\tDivision_Code as string,\n\t\tUnion_Status as string,\n\t\tAddress_1 as string,\n\t\tAddress_2 as string,\n\t\tCity as string,\n\t\tState as string,\n\t\tZip as string,\n\t\tBirth_Date as string,\n\t\tHire_Date as string,\n\t\tTermination_Date as string,\n\t\tRehire_Date as string,\n\t\tGross_Earnings as string,\n\t\tPay_Period_Hours as string,\n\t\tEmployee_Deferral as string,\n\t\tEmployee_Roth as string,\n\t\tLoan_Payments as string,\n\t\tEmployee_After_Tax as string,\n\t\tEmployer_Match as string,\n\t\tSafe_Harbor_Match as string,\n\t\tSafe_Harbor_Non_Elective as string,\n\t\tQualified_Matching_Contribution as string,\n\t\tQualified_Non_Elective_Contribution as string,\n\t\tProfit_Sharing as string,\n\t\tMoney_Purchase as string,\n\t\tPay_Frequency as string,\n\t\tEmail as string,\n\t\tPhone_Number as string,\n\t\tPay_Type as string,\n\t\tAdjusted_Seniority_Date as string,\n\t\tLeave_Of_Absence_Begin_Date as string,\n\t\tLeave_Of_Absence_End_Date as string,\n\t\tPayroll_Begin_Date as string,\n\t\tPayroll_End_Date as string,\n\t\tCost_Center_1_Code as string,\n\t\tCost_Center_2_Code as string,\n\t\tCost_Center_3_Code as string,\n\t\tPlan_Earnings as string,\n\t\tExcluded_Earnings as string,\n\t\tSection_125 as string,\n\t\tLoan_Additional_Principal_Payments as string,\n\t\tLoan_Number as string,\n\t\tRollover as string,\n\t\tRollover_Roth as string,\n\t\tYTD_Gross_Earnings as string,\n\t\tPlan_YTD_Earnings as string,\n\t\tPlan_YTD_Hours as string,\n\t\tPlan_YTD_Excluded_Earnings as string,\n\t\tPlan_YTD_Section_125 as string,\n\t\tPlan_YTD_Employee_Deferral as string,\n\t\tPlan_YTD_Employee_Roth as string,\n\t\tPlan_YTD_Employee_After_Tax as string,\n\t\tPlan_YTD_Loan_Payments as string,\n\t\tPlan_YTD_Loan_Number as string,\n\t\tPlan_YTD_Employer_Match as string,\n\t\tPlan_YTD_Safe_Harbor_Match as string,\n\t\tPlan_YTD_Qualified_Matching_Contribution as string,\n\t\tPlan_YTD_Safe_Harbor_Non_Elective as string,\n\t\tPlan_YTD_Qualified_Non_Elective_Contribution as string,\n\t\tPlan_YTD_Profit_Sharing as string,\n\t\tPlan_YTD_Money_Purchase as string,\n\t\tPlan_YTD_Rollover as string,\n\t\tPlan_YTD_Rollover_Roth as string,\n\t\tPlan_ID as string,\n\t\tPlan_Name as string,\n\t\tInvestment_Election as string,\n\t\tInvestment_Change_Date as string,\n\t\tRecipient_Vendor_Plan_ID as string,\n\t\tDetail as string,\n\t\tEmployer_EIN as string,\n\t\tEmployer_Name as string,\n\t\tEmployer_Plan_ID as string,\n\t\tEmployer_Sub_Plan_ID as string,\n\t\tOriginating_Vendor_ID as string,\n\t\tOriginating_Vendor_Sub_Plan_ID as string,\n\t\tRecipient_Vendor_Sub_Plan_ID as string,\n\t\tType_of_Account as string,\n\t\tHR_Area_Or_Location_Code as string,\n\t\tHR_Sub_Area as string,\n\t\tAdjusted_Date_of_Hire as string,\n\t\tPayroll_Mode as string,\n\t\tContribution_Source_Code_1 as string,\n\t\tContribution_Source_Amount_1 as string,\n\t\tContribution_Source_Code_2 as string,\n\t\tContribution_Source_Amount_2 as string,\n\t\tContribution_Source_Code_3 as string,\n\t\tContribution_Source_Amount_3 as string,\n\t\tContribution_Source_Code_4 as string,\n\t\tContribution_Source_Amount_4 as string,\n\t\tContribution_Source_Code_5 as string,\n\t\tContribution_Source_Amount_5 as string,\n\t\tContribution_Source_Code_6 as string,\n\t\tContribution_Source_Amount_6 as string,\n\t\tContribution_Source_Code_7 as string,\n\t\tContribution_Source_Amount_7 as string,\n\t\tContribution_Source_Code_8 as string,\n\t\tContribution_Source_Amount_8 as string,\n\t\tFinal_Contribution_Indicator as string,\n\t\tLoan_Number_1 as string,\n\t\tLoan_Repayment_Amount_1 as string,\n\t\tLoan_Number_2 as string,\n\t\tLoan_Repayment_Amout_2 as string,\n\t\tLoan_Number_3 as string,\n\t\tLoan_Repayment_Amount_3 as string,\n\t\tLoan_Number_4 as string,\n\t\tLoan_Repayment_Amount_4 as string,\n\t\tLoan_Number_5 as string,\n\t\tLoan_Repayment_Amount_5 as string,\n\t\tOMNI_Field_52 as string,\n\t\tOMNI_Field_53 as string,\n\t\tOMNI_Field_54 as string,\n\t\tOMNI_Field_55 as string,\n\t\tOMNI_Field_56 as string,\n\t\tOMNI_Field_57 as string,\n\t\tOMNI_Field_58 as string,\n\t\tOMNI_Field_59 as string,\n\t\tOMNI_Field_60 as string,\n\t\tOMNI_Field_61 as string,\n\t\tOMNI_Field_62 as string,\n\t\tOMNI_Field_63 as string,\n\t\tOMNI_Field_64 as string,\n\t\tOMNI_Field_65 as string,\n\t\tOMNI_Field_66 as string,\n\t\tOMNI_Field_67 as string,\n\t\tRecord_Level_1 as string,\n\t\tRecord_Level_1_Vendor as string,\n\t\tRecord_Level_1_File_Release_Time as string,\n\t\tRecord_Level_1_Total_Amount_in_File as string,\n\t\tRecord_Level_1_Number_of_Contributions as string,\n\t\tRecord_Level_1_Datetime as string,\n\t\tRecord_Level_1_Number_of_Participants as string,\n\t\tRecord_Level_2 as string,\n\t\tRecord_Level_2_Plan_Name as string,\n\t\tRecord_Level_2_Remitter_Plan_Code as string,\n\t\tRecord_Level_2_Column_D as string,\n\t\tRecord_Level_2_Column_E as string,\n\t\tRecord_Level_2_Payroll_Date as string,\n\t\tRecord_Level_2_Total_Amount_in_Plan as string,\n\t\tRecord_Level_2_Number_of_Participants as string,\n\t\tRecord_Level_3 as string,\n\t\tRecord_Level_3_SSN as string,\n\t\tRecord_Level_3_Last_Name as string,\n\t\tRecord_Level_3_First_Name as string,\n\t\tRecord_Level_3_Remitter_Plan_Code as string,\n\t\tRecord_Level_3_Remittance_Type as string,\n\t\tRecord_Level_3_Source_Code as string,\n\t\tRecord_Level_3_Number_of_Participants as string,\n\t\tRecord_Level_3_Column_I as string,\n\t\tRecord_Level_3_Amount as string,\n\t\tRecord_Level_4 as string,\n\t\tRecord_Level_4_Plan_Name as string,\n\t\tRecord_Level_4_Remitter_Plan_Code as string,\n\t\tRecord_Level_4_Column_D as string,\n\t\tRecord_Level_4_Column_E as string,\n\t\tRecord_Level_4_Payroll_Date as string,\n\t\tRecord_Level_4_Total_Amount_in_Plan as string,\n\t\tRecord_Level_4_Number_of_Participants as string,\n\t\tRecord_Level_5 as string,\n\t\tRecord_Level_5_Vendor as string,\n\t\tRecord_Level_5_File_Release_Time as string,\n\t\tRecord_Level_5_Total_Amount_in_File as string,\n\t\tRecord_Level_5_Number_of_Contributions as string,\n\t\tRecord_Level_5_Datetime as string,\n\t\tRecord_Level_5_Number_of_Participants as string,\n\t\tRemittance_Type as string,\n\t\tContribution_Rate as string,\n\t\tLoan_Balance as string,\n\t\tComments as string,\n\t\tHeader_Column_1 as string,\n\t\tHeader_Column_2 as string,\n\t\tHeader_Column_3 as string,\n\t\tHeader_Column_4 as string,\n\t\tHeader_Column_5 as string,\n\t\tHeader_Column_6 as string,\n\t\tHeader_Column_7 as string,\n\t\tHeader_Column_8 as string,\n\t\tHeader_Column_9 as string,\n\t\tHeader_Column_10 as string,\n\t\tFooter_Column_1 as string,\n\t\tFooter_Column_2 as string,\n\t\tFooter_Column_3 as string,\n\t\tFooter_Column_4 as string,\n\t\tFooter_Column_5 as string,\n\t\tFooter_Column_6 as string,\n\t\tFooter_Column_7 as string,\n\t\tFooter_Column_8 as string,\n\t\tFooter_Column_9 as string,\n\t\tFooter_Column_10 as string,\n\t\tOMNI_Field_50 as string,\n\t\tOMNI_Field_51 as string,\n\t\tPAYLOCITY_Field_71 as string,\n\t\tPAYLOCITY_Field_72 as string,\n\t\tPAYLOCITY_Field_73 as string,\n\t\tPAYLOCITY_Field_74 as string,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'NONE',\n\tformat: 'table') ~> LandingTable\nLandingTable derive(Gross_Earnings = toDecimal(Gross_Earnings,18,2),\n\t\tPay_Period_Hours = toDecimal(Pay_Period_Hours,18,2),\n\t\tEmployee_Deferral = toDecimal(Employee_Deferral,18,2),\n\t\tEmployee_Roth = toDecimal(Employee_Roth,18,2),\n\t\tLoan_Payments = toDecimal(Loan_Payments,18,2),\n\t\tEmployee_After_Tax = toDecimal(Employee_After_Tax,18,2),\n\t\tEmployer_Match = toDecimal(Employer_Match,18,2),\n\t\tSafe_Harbor_Match = toDecimal(Safe_Harbor_Match,18,2),\n\t\tSafe_Harbor_Non_Elective = toDecimal(Safe_Harbor_Non_Elective,18,2),\n\t\tQualified_Matching_Contribution = toDecimal(Qualified_Matching_Contribution,18,2),\n\t\tQualified_Non_Elective_Contribution = toDecimal(Qualified_Non_Elective_Contribution,18,2),\n\t\tProfit_Sharing = toDecimal(Profit_Sharing,18,2),\n\t\tMoney_Purchase = toDecimal(Money_Purchase,18,2),\n\t\tContribution_Source_Amount_1 = toDecimal(Contribution_Source_Amount_1,18,2)) ~> DerivedColumnDecimls\nDerivedColumnDecimls derive(Contribution_Source_Amount_2 = toDecimal(Contribution_Source_Amount_2,18,2),\n\t\tContribution_Source_Amount_3 = toDecimal(Contribution_Source_Amount_3,18,2),\n\t\tContribution_Source_Amount_4 = toDecimal(Contribution_Source_Amount_4,18,2),\n\t\tContribution_Source_Amount_5 = toDecimal(Contribution_Source_Amount_5,18,2),\n\t\tContribution_Source_Amount_6 = toDecimal(Contribution_Source_Amount_6,18,2),\n\t\tContribution_Source_Amount_7 = toDecimal(Contribution_Source_Amount_7,18,2),\n\t\tContribution_Source_Amount_8 = toDecimal(Contribution_Source_Amount_8,18,2),\n\t\tLoan_Repayment_Amount_1 = toDecimal(Loan_Repayment_Amount_1,18,2),\n\t\tLoan_Repayment_Amout_2 = toDecimal(Loan_Repayment_Amout_2,18,2),\n\t\tLoan_Repayment_Amount_3 = toDecimal(Loan_Repayment_Amount_3,18,2),\n\t\tLoan_Repayment_Amount_4 = toDecimal(Loan_Repayment_Amount_4,18,2),\n\t\tLoan_Repayment_Amount_5 = toDecimal(Loan_Repayment_Amount_5,18,2),\n\t\tRecord_Level_3_Amount = toDecimal(Record_Level_3_Amount,18,2),\n\t\tSSN = replace(SSN,'-','')) ~> DerivedColumnDecimals2\nDerivedColumnDecimals2 derive(Birth_Date = iif(isNull((iif(isNull(toDate(Birth_Date, 'MM/dd/yyyy')),toDate(Birth_Date, 'yyyyMMdd'),toDate(Birth_Date, 'MM/dd/yyyy')))),toDate(Birth_Date,'yyyy-MM-dd'),iif(isNull(toDate(Birth_Date, 'MM/dd/yyyy')),toDate(Birth_Date, 'yyyyMMdd'),toDate(Birth_Date, 'MM/dd/yyyy'))),\n\t\tHire_Date = iif(isNull((iif(isNull(toDate(Hire_Date, 'MM/dd/yyyy')),toDate(Hire_Date, 'yyyyMMdd'),toDate(Hire_Date, 'MM/dd/yyyy')))),toDate(Hire_Date,'yyyy-MM-dd'),iif(isNull(toDate(Hire_Date, 'MM/dd/yyyy')),toDate(Hire_Date, 'yyyyMMdd'),toDate(Hire_Date, 'MM/dd/yyyy'))),\n\t\tTermination_Date = iif(isNull((iif(isNull(toDate(Termination_Date, 'MM/dd/yyyy')),toDate(Termination_Date, 'yyyyMMdd'),toDate(Termination_Date, 'MM/dd/yyyy')))),toDate(Termination_Date,'yyyy-MM-dd'),iif(isNull(toDate(Termination_Date, 'MM/dd/yyyy')),toDate(Termination_Date, 'yyyyMMdd'),toDate(Termination_Date, 'MM/dd/yyyy'))),\n\t\tRehire_Date = iif(isNull((iif(isNull(toDate(Rehire_Date, 'MM/dd/yyyy')),toDate(Rehire_Date, 'yyyyMMdd'),toDate(Rehire_Date, 'MM/dd/yyyy')))),toDate(Rehire_Date,'yyyy-MM-dd'),iif(isNull(toDate(Rehire_Date, 'MM/dd/yyyy')),toDate(Rehire_Date, 'yyyyMMdd'),toDate(Rehire_Date, 'MM/dd/yyyy'))),\n\t\tPayroll_End_Date = iif(isNull((iif(isNull(toDate(Payroll_End_Date, 'MM/dd/yyyy')),toDate(Payroll_End_Date, 'yyyyMMdd'),toDate(Payroll_End_Date, 'MM/dd/yyyy')))),toDate(Payroll_End_Date,'yyyy-MM-dd'),iif(isNull(toDate(Payroll_End_Date, 'MM/dd/yyyy')),toDate(Payroll_End_Date, 'yyyyMMdd'),toDate(Payroll_End_Date, 'MM/dd/yyyy'))),\n\t\tRecord_Level_2_Payroll_Date = iif(isNull((iif(isNull(toDate(Record_Level_2_Payroll_Date, 'MM/dd/yyyy')),toDate(Record_Level_2_Payroll_Date, 'yyyyMMdd'),toDate(Record_Level_2_Payroll_Date, 'MM/dd/yyyy')))),toDate(Record_Level_2_Payroll_Date,'yyyy-MM-dd'),iif(isNull(toDate(Record_Level_2_Payroll_Date, 'MM/dd/yyyy')),toDate(Record_Level_2_Payroll_Date, 'yyyyMMdd'),toDate(Record_Level_2_Payroll_Date, 'MM/dd/yyyy')))) ~> DerivedColumnDates\nDerivedColumnDates sink(input(\n\t\tLanding_Contribution_Data_ID as long,\n\t\tFile_received_ID as integer,\n\t\tInbound_File_Setup_ID as integer,\n\t\tCompany_Code as string,\n\t\tCheck_Date as date,\n\t\tSSN as string,\n\t\tFirst_Name as string,\n\t\tMiddle_Name as string,\n\t\tLast_Name as string,\n\t\tTitle as string,\n\t\tEmployee_ID as string,\n\t\tGender as string,\n\t\tEmployee_Status as string,\n\t\tMarital_Status as string,\n\t\tDivision_Code as string,\n\t\tUnion_Status as string,\n\t\tAddress_1 as string,\n\t\tAddress_2 as string,\n\t\tCity as string,\n\t\tState as string,\n\t\tZip as long,\n\t\tBirth_Date as date,\n\t\tHire_Date as date,\n\t\tTermination_Date as date,\n\t\tRehire_Date as date,\n\t\tGross_Earnings as decimal(18,2),\n\t\tPay_Period_Hours as decimal(18,2),\n\t\tEmployee_Deferral as decimal(18,2),\n\t\tEmployee_Roth as decimal(18,2),\n\t\tLoan_Payments as decimal(18,2),\n\t\tEmployee_After_Tax as decimal(18,2),\n\t\tEmployer_Match as decimal(18,2),\n\t\tSafe_Harbor_Match as decimal(18,2),\n\t\tSafe_Harbor_Non_Elective as decimal(18,2),\n\t\tQualified_Matching_Contribution as decimal(18,2),\n\t\tQualified_Non_Elective_Contribution as decimal(18,2),\n\t\tProfit_Sharing as decimal(18,2),\n\t\tMoney_Purchase as decimal(18,2),\n\t\tPay_Frequency as string,\n\t\tEmail as string,\n\t\tPhone_Number as string,\n\t\tPay_Type as string,\n\t\tAdjusted_Seniority_Date as date,\n\t\tLeave_Of_Absence_Begin_Date as timestamp,\n\t\tLeave_Of_Absence_End_Date as timestamp,\n\t\tPayroll_Begin_Date as date,\n\t\tPayroll_End_Date as date,\n\t\tCost_Center_1_Code as string,\n\t\tCost_Center_2_Code as string,\n\t\tCost_Center_3_Code as string,\n\t\tPlan_Earnings as decimal(18,2),\n\t\tExcluded_Earnings as decimal(18,2),\n\t\tSection_125 as string,\n\t\tLoan_Additional_Principal_Payments as decimal(18,2),\n\t\tLoan_Number as long,\n\t\tRollover as decimal(18,2),\n\t\tRollover_Roth as decimal(18,2),\n\t\tYTD_Gross_Earnings as decimal(18,2),\n\t\tPlan_YTD_Earnings as decimal(18,2),\n\t\tPlan_YTD_Hours as decimal(18,2),\n\t\tPlan_YTD_Excluded_Earnings as decimal(18,2),\n\t\tPlan_YTD_Section_125 as string,\n\t\tPlan_YTD_Employee_Deferral as decimal(18,2),\n\t\tPlan_YTD_Employee_Roth as decimal(18,2),\n\t\tPlan_YTD_Employee_After_Tax as decimal(18,2),\n\t\tPlan_YTD_Loan_Payments as decimal(18,2),\n\t\tPlan_YTD_Loan_Number as long,\n\t\tPlan_YTD_Employer_Match as decimal(18,2),\n\t\tPlan_YTD_Safe_Harbor_Match as decimal(18,2),\n\t\tPlan_YTD_Qualified_Matching_Contribution as decimal(18,2),\n\t\tPlan_YTD_Safe_Harbor_Non_Elective as decimal(18,2),\n\t\tPlan_YTD_Qualified_Non_Elective_Contribution as decimal(18,2),\n\t\tPlan_YTD_Profit_Sharing as decimal(18,2),\n\t\tPlan_YTD_Money_Purchase as decimal(18,2),\n\t\tPlan_YTD_Rollover as decimal(18,2),\n\t\tPlan_YTD_Rollover_Roth as decimal(18,2),\n\t\tPlan_ID as string,\n\t\tPlan_Name as string,\n\t\tInvestment_Election as string,\n\t\tInvestment_Change_Date as date,\n\t\tRecipient_Vendor_Plan_ID as string,\n\t\tDetail as string,\n\t\tEmployer_EIN as integer,\n\t\tEmployer_Name as string,\n\t\tEmployer_Plan_ID as integer,\n\t\tEmployer_Sub_Plan_ID as integer,\n\t\tOriginating_Vendor_ID as integer,\n\t\tOriginating_Vendor_Sub_Plan_ID as integer,\n\t\tRecipient_Vendor_Sub_Plan_ID as integer,\n\t\tType_of_Account as string,\n\t\tHR_Area_Or_Location_Code as string,\n\t\tHR_Sub_Area as string,\n\t\tAdjusted_Date_of_Hire as date,\n\t\tPayroll_Mode as string,\n\t\tContribution_Source_Code_1 as string,\n\t\tContribution_Source_Amount_1 as decimal(18,2),\n\t\tContribution_Source_Code_2 as string,\n\t\tContribution_Source_Amount_2 as decimal(18,2),\n\t\tContribution_Source_Code_3 as string,\n\t\tContribution_Source_Amount_3 as decimal(18,2),\n\t\tContribution_Source_Code_4 as string,\n\t\tContribution_Source_Amount_4 as decimal(18,2),\n\t\tContribution_Source_Code_5 as string,\n\t\tContribution_Source_Amount_5 as decimal(18,2),\n\t\tContribution_Source_Code_6 as string,\n\t\tContribution_Source_Amount_6 as decimal(18,2),\n\t\tContribution_Source_Code_7 as string,\n\t\tContribution_Source_Amount_7 as decimal(18,2),\n\t\tContribution_Source_Code_8 as string,\n\t\tContribution_Source_Amount_8 as decimal(18,2),\n\t\tFinal_Contribution_Indicator as string,\n\t\tLoan_Number_1 as long,\n\t\tLoan_Repayment_Amount_1 as decimal(18,2),\n\t\tLoan_Number_2 as long,\n\t\tLoan_Repayment_Amout_2 as decimal(18,2),\n\t\tLoan_Number_3 as long,\n\t\tLoan_Repayment_Amount_3 as decimal(18,2),\n\t\tLoan_Number_4 as long,\n\t\tLoan_Repayment_Amount_4 as decimal(18,2),\n\t\tLoan_Number_5 as long,\n\t\tLoan_Repayment_Amount_5 as decimal(18,2),\n\t\tOMNI_Field_52 as string,\n\t\tOMNI_Field_53 as string,\n\t\tOMNI_Field_54 as string,\n\t\tOMNI_Field_55 as string,\n\t\tOMNI_Field_56 as string,\n\t\tOMNI_Field_57 as string,\n\t\tOMNI_Field_58 as string,\n\t\tOMNI_Field_59 as string,\n\t\tOMNI_Field_60 as string,\n\t\tOMNI_Field_61 as string,\n\t\tOMNI_Field_62 as string,\n\t\tOMNI_Field_63 as string,\n\t\tOMNI_Field_64 as string,\n\t\tOMNI_Field_65 as string,\n\t\tOMNI_Field_66 as string,\n\t\tOMNI_Field_67 as string,\n\t\tRecord_Level_1 as integer,\n\t\tRecord_Level_1_Vendor as string,\n\t\tRecord_Level_1_File_Release_Time as timestamp,\n\t\tRecord_Level_1_Total_Amount_in_File as decimal(18,2),\n\t\tRecord_Level_1_Number_of_Contributions as integer,\n\t\tRecord_Level_1_Datetime as timestamp,\n\t\tRecord_Level_1_Number_of_Participants as integer,\n\t\tRecord_Level_2 as integer,\n\t\tRecord_Level_2_Plan_Name as string,\n\t\tRecord_Level_2_Remitter_Plan_Code as string,\n\t\tRecord_Level_2_Column_D as string,\n\t\tRecord_Level_2_Column_E as string,\n\t\tRecord_Level_2_Payroll_Date as date,\n\t\tRecord_Level_2_Total_Amount_in_Plan as decimal(18,2),\n\t\tRecord_Level_2_Number_of_Participants as integer,\n\t\tRecord_Level_3 as integer,\n\t\tRecord_Level_3_SSN as string,\n\t\tRecord_Level_3_Last_Name as string,\n\t\tRecord_Level_3_First_Name as string,\n\t\tRecord_Level_3_Remitter_Plan_Code as string,\n\t\tRecord_Level_3_Remittance_Type as string,\n\t\tRecord_Level_3_Source_Code as string,\n\t\tRecord_Level_3_Number_of_Participants as integer,\n\t\tRecord_Level_3_Column_I as string,\n\t\tRecord_Level_3_Amount as decimal(18,2),\n\t\tRecord_Level_4 as integer,\n\t\tRecord_Level_4_Plan_Name as string,\n\t\tRecord_Level_4_Remitter_Plan_Code as string,\n\t\tRecord_Level_4_Column_D as string,\n\t\tRecord_Level_4_Column_E as string,\n\t\tRecord_Level_4_Payroll_Date as date,\n\t\tRecord_Level_4_Total_Amount_in_Plan as decimal(18,2),\n\t\tRecord_Level_4_Number_of_Participants as integer,\n\t\tRecord_Level_5 as integer,\n\t\tRecord_Level_5_Vendor as string,\n\t\tRecord_Level_5_File_Release_Time as timestamp,\n\t\tRecord_Level_5_Total_Amount_in_File as decimal(18,2),\n\t\tRecord_Level_5_Number_of_Contributions as integer,\n\t\tRecord_Level_5_Datetime as timestamp,\n\t\tRecord_Level_5_Number_of_Participants as integer,\n\t\tRemittance_Type as string,\n\t\tContribution_Rate as decimal(18,2),\n\t\tLoan_Balance as decimal(18,2),\n\t\tComments as string,\n\t\tHeader_Column_1 as string,\n\t\tHeader_Column_2 as string,\n\t\tHeader_Column_3 as string,\n\t\tHeader_Column_4 as string,\n\t\tHeader_Column_5 as string,\n\t\tHeader_Column_6 as string,\n\t\tHeader_Column_7 as string,\n\t\tHeader_Column_8 as string,\n\t\tHeader_Column_9 as string,\n\t\tHeader_Column_10 as string,\n\t\tFooter_Column_1 as string,\n\t\tFooter_Column_2 as string,\n\t\tFooter_Column_3 as string,\n\t\tFooter_Column_4 as string,\n\t\tFooter_Column_5 as string,\n\t\tFooter_Column_6 as string,\n\t\tFooter_Column_7 as string,\n\t\tFooter_Column_8 as string,\n\t\tFooter_Column_9 as string,\n\t\tFooter_Column_10 as string,\n\t\tOMNI_Field_50 as string,\n\t\tOMNI_Field_51 as string,\n\t\tPAYLOCITY_Field_71 as string,\n\t\tPAYLOCITY_Field_72 as string,\n\t\tPAYLOCITY_Field_73 as string,\n\t\tPAYLOCITY_Field_74 as string,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/StagingIngestionTempTable')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/StagingIngestionTempTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureIngestiontablelink",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Landing_Contribution_Data_ID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "File_received_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Inbound_File_Setup_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Company_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Check_Date",
+						"type": "date"
+					},
+					{
+						"name": "SSN",
+						"type": "varchar"
+					},
+					{
+						"name": "First_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Middle_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Last_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Title",
+						"type": "varchar"
+					},
+					{
+						"name": "Employee_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Gender",
+						"type": "varchar"
+					},
+					{
+						"name": "Employee_Status",
+						"type": "varchar"
+					},
+					{
+						"name": "Marital_Status",
+						"type": "varchar"
+					},
+					{
+						"name": "Division_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Union_Status",
+						"type": "varchar"
+					},
+					{
+						"name": "Address_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Address_2",
+						"type": "varchar"
+					},
+					{
+						"name": "City",
+						"type": "varchar"
+					},
+					{
+						"name": "State",
+						"type": "varchar"
+					},
+					{
+						"name": "Zip",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Birth_Date",
+						"type": "date"
+					},
+					{
+						"name": "Hire_Date",
+						"type": "date"
+					},
+					{
+						"name": "Termination_Date",
+						"type": "date"
+					},
+					{
+						"name": "Rehire_Date",
+						"type": "date"
+					},
+					{
+						"name": "Gross_Earnings",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Pay_Period_Hours",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Employee_Deferral",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Employee_Roth",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Payments",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Employee_After_Tax",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Employer_Match",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Safe_Harbor_Match",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Safe_Harbor_Non_Elective",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Qualified_Matching_Contribution",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Qualified_Non_Elective_Contribution",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Profit_Sharing",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Money_Purchase",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Pay_Frequency",
+						"type": "varchar"
+					},
+					{
+						"name": "Email",
+						"type": "varchar"
+					},
+					{
+						"name": "Phone_Number",
+						"type": "varchar"
+					},
+					{
+						"name": "Pay_Type",
+						"type": "varchar"
+					},
+					{
+						"name": "Adjusted_Seniority_Date",
+						"type": "date"
+					},
+					{
+						"name": "Leave_Of_Absence_Begin_Date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Leave_Of_Absence_End_Date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Payroll_Begin_Date",
+						"type": "date"
+					},
+					{
+						"name": "Payroll_End_Date",
+						"type": "date"
+					},
+					{
+						"name": "Cost_Center_1_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Cost_Center_2_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Cost_Center_3_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_Earnings",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Excluded_Earnings",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Section_125",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Additional_Principal_Payments",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Number",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Rollover",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Rollover_Roth",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "YTD_Gross_Earnings",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Earnings",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Hours",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Excluded_Earnings",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Section_125",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Employee_Deferral",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Employee_Roth",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Employee_After_Tax",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Loan_Payments",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Loan_Number",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Plan_YTD_Employer_Match",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Safe_Harbor_Match",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Qualified_Matching_Contribution",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Safe_Harbor_Non_Elective",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Qualified_Non_Elective_Contribution",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Profit_Sharing",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Money_Purchase",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Rollover",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_YTD_Rollover_Roth",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Plan_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Investment_Election",
+						"type": "varchar"
+					},
+					{
+						"name": "Investment_Change_Date",
+						"type": "date"
+					},
+					{
+						"name": "Recipient_Vendor_Plan_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Detail",
+						"type": "varchar"
+					},
+					{
+						"name": "Employer_EIN",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Employer_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Employer_Plan_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Employer_Sub_Plan_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Originating_Vendor_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Originating_Vendor_Sub_Plan_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Recipient_Vendor_Sub_Plan_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Type_of_Account",
+						"type": "varchar"
+					},
+					{
+						"name": "HR_Area_Or_Location_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "HR_Sub_Area",
+						"type": "varchar"
+					},
+					{
+						"name": "Adjusted_Date_of_Hire",
+						"type": "date"
+					},
+					{
+						"name": "Payroll_Mode",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Code_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_1",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_2",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_3",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_4",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_5",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_5",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_6",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_6",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_7",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_7",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Contribution_Source_Code_8",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_8",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Final_Contribution_Indicator",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Number_1",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Loan_Repayment_Amount_1",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Number_2",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Loan_Repayment_Amout_2",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Number_3",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Loan_Repayment_Amount_3",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Number_4",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Loan_Repayment_Amount_4",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Number_5",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Loan_Repayment_Amount_5",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "OMNI_Field_52",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_53",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_54",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_55",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_56",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_57",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_58",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_59",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_60",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_61",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_62",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_63",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_64",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_65",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_66",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_67",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_1",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_1_Vendor",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_1_File_Release_Time",
+						"type": "time",
+						"scale": 7
+					},
+					{
+						"name": "Record_Level_1_Total_Amount_in_File",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Record_Level_1_Number_of_Contributions",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_1_Datetime",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Record_Level_1_Number_of_Participants",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_2",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_2_Plan_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Remitter_Plan_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Column_D",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Column_E",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Payroll_Date",
+						"type": "date"
+					},
+					{
+						"name": "Record_Level_2_Total_Amount_in_Plan",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Record_Level_2_Number_of_Participants",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_3",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_3_SSN",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Last_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_First_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Remitter_Plan_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Remittance_Type",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Source_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Number_of_Participants",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_3_Column_I",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Amount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Record_Level_4",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_4_Plan_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Remitter_Plan_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Column_D",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Column_E",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Payroll_Date",
+						"type": "date"
+					},
+					{
+						"name": "Record_Level_4_Total_Amount_in_Plan",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Record_Level_4_Number_of_Participants",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_5",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_5_Vendor",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_5_File_Release_Time",
+						"type": "time",
+						"scale": 7
+					},
+					{
+						"name": "Record_Level_5_Total_Amount_in_File",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Record_Level_5_Number_of_Contributions",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Record_Level_5_Datetime",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Record_Level_5_Number_of_Participants",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Remittance_Type",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Rate",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Loan_Balance",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Comments",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_5",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_6",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_7",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_8",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_9",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_10",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_5",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_6",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_7",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_8",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_9",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_10",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_50",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_51",
+						"type": "varchar"
+					},
+					{
+						"name": "PAYLOCITY_Field_71",
+						"type": "varchar"
+					},
+					{
+						"name": "PAYLOCITY_Field_72",
+						"type": "varchar"
+					},
+					{
+						"name": "PAYLOCITY_Field_73",
+						"type": "varchar"
+					},
+					{
+						"name": "PAYLOCITY_Field_74",
+						"type": "varchar"
+					},
+					{
+						"name": "Status",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tbl_Staging_Temp_Data"
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

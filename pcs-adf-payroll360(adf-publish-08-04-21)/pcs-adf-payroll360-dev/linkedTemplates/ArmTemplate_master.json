@@ -1,0 +1,366 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "pcs-adf-payroll360-dev"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
+		"AzureBlobStorage2_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage2'"
+		},
+		"AzureBlobStorage3_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage3'"
+		},
+		"AzureBlobStorage4_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage4'"
+		},
+		"AzureBlobStorageRelius_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageRelius'"
+		},
+		"AzureIngestiontablelink_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureIngestiontablelink'"
+		},
+		"AzureSqlDBReliusValidn_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDBReliusValidn'"
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
+		},
+		"AzureSqlDatabaseVoya_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabaseVoya'"
+		},
+		"AzureSqlDatabaseforVoya_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabaseforVoya'"
+		},
+		"FtpServer1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'FtpServer1'"
+		},
+		"FtpServer2_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'FtpServer2'"
+		},
+		"TransformVoyaLinkedService_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'TransformVoyaLinkedService'"
+		},
+		"VoyaTransformLinkedService_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'VoyaTransformLinkedService'"
+		},
+		"azureftpblob_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'azureftpblob'"
+		},
+		"AzureBlobStorageSourceDatasetEntity_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": "@dataset().file_name"
+		},
+		"AzureBlobStorageSourceDatasetEntity_properties_typeProperties_folderPath": {
+			"type": "string",
+			"defaultValue": "@dataset().container_name"
+		},
+		"FtpServer1_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "52.249.195.251"
+		},
+		"FtpServer1_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "ftpuser1"
+		},
+		"FtpServer2_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "52.249.195.251"
+		},
+		"FtpServer2_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "ftpuser1"
+		},
+		"TransformVoyaLinkedService_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stpayroll360001.dfs.core.windows.net"
+		},
+		"ConsolidatedADFTrigger_properties_ConsolidatedPipeline_parameters_FileName": {
+			"type": "string",
+			"defaultValue": "@triggerBody().fileName"
+		},
+		"ConsolidatedADFTrigger_properties_ConsolidatedPipeline_parameters_FilePath": {
+			"type": "string",
+			"defaultValue": "@triggerBody().folderPath"
+		},
+		"ConsolidatedADFTrigger_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"TriggerForADFInsertFileReceivedOmni_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"TriggerForADFInsertFileReceivedPaylocity_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"TriggerForADFInsertFileReceivedReliusPaylocity_properties_PipelineReliusPaylocity_parameters_FileName": {
+			"type": "string",
+			"defaultValue": "@triggerBody().fileName"
+		},
+		"TriggerForADFInsertFileReceivedReliusPaylocity_properties_PipelineReliusPaylocity_parameters_FilePath": {
+			"type": "string",
+			"defaultValue": "@triggerBody().folderPath"
+		},
+		"TriggerForADFInsertFileReceivedReliusPaylocity_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"TriggerForADFInsertFileReceivedSchoolsfirst_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"TriggerForADFInsertFileReceivedVoya_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/8aa224f7-539d-46b5-a81f-385ad15a78ab/resourceGroups/pcs-rg-payroll360-project-dev/providers/Microsoft.Storage/storageAccounts/stpayroll360001"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "pcs-adf-payroll360-dev_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureBlobStorage1_connectionString": {
+						"value": "[parameters('AzureBlobStorage1_connectionString')]"
+					},
+					"AzureBlobStorage2_connectionString": {
+						"value": "[parameters('AzureBlobStorage2_connectionString')]"
+					},
+					"AzureBlobStorage3_connectionString": {
+						"value": "[parameters('AzureBlobStorage3_connectionString')]"
+					},
+					"AzureBlobStorage4_connectionString": {
+						"value": "[parameters('AzureBlobStorage4_connectionString')]"
+					},
+					"AzureBlobStorageRelius_connectionString": {
+						"value": "[parameters('AzureBlobStorageRelius_connectionString')]"
+					},
+					"AzureIngestiontablelink_connectionString": {
+						"value": "[parameters('AzureIngestiontablelink_connectionString')]"
+					},
+					"AzureSqlDBReliusValidn_connectionString": {
+						"value": "[parameters('AzureSqlDBReliusValidn_connectionString')]"
+					},
+					"AzureSqlDatabase1_connectionString": {
+						"value": "[parameters('AzureSqlDatabase1_connectionString')]"
+					},
+					"AzureSqlDatabaseVoya_connectionString": {
+						"value": "[parameters('AzureSqlDatabaseVoya_connectionString')]"
+					},
+					"AzureSqlDatabaseforVoya_connectionString": {
+						"value": "[parameters('AzureSqlDatabaseforVoya_connectionString')]"
+					},
+					"FtpServer1_password": {
+						"value": "[parameters('FtpServer1_password')]"
+					},
+					"FtpServer2_password": {
+						"value": "[parameters('FtpServer2_password')]"
+					},
+					"TransformVoyaLinkedService_accountKey": {
+						"value": "[parameters('TransformVoyaLinkedService_accountKey')]"
+					},
+					"VoyaTransformLinkedService_connectionString": {
+						"value": "[parameters('VoyaTransformLinkedService_connectionString')]"
+					},
+					"azureftpblob_connectionString": {
+						"value": "[parameters('azureftpblob_connectionString')]"
+					},
+					"FtpServer1_properties_typeProperties_host": {
+						"value": "[parameters('FtpServer1_properties_typeProperties_host')]"
+					},
+					"FtpServer1_properties_typeProperties_userName": {
+						"value": "[parameters('FtpServer1_properties_typeProperties_userName')]"
+					},
+					"FtpServer2_properties_typeProperties_host": {
+						"value": "[parameters('FtpServer2_properties_typeProperties_host')]"
+					},
+					"FtpServer2_properties_typeProperties_userName": {
+						"value": "[parameters('FtpServer2_properties_typeProperties_userName')]"
+					},
+					"TransformVoyaLinkedService_properties_typeProperties_url": {
+						"value": "[parameters('TransformVoyaLinkedService_properties_typeProperties_url')]"
+					},
+					"TriggerForADFInsertFileReceivedOmni_properties_typeProperties_scope": {
+						"value": "[parameters('TriggerForADFInsertFileReceivedOmni_properties_typeProperties_scope')]"
+					},
+					"TriggerForADFInsertFileReceivedPaylocity_properties_typeProperties_scope": {
+						"value": "[parameters('TriggerForADFInsertFileReceivedPaylocity_properties_typeProperties_scope')]"
+					},
+					"TriggerForADFInsertFileReceivedSchoolsfirst_properties_typeProperties_scope": {
+						"value": "[parameters('TriggerForADFInsertFileReceivedSchoolsfirst_properties_typeProperties_scope')]"
+					},
+					"TriggerForADFInsertFileReceivedVoya_properties_typeProperties_scope": {
+						"value": "[parameters('TriggerForADFInsertFileReceivedVoya_properties_typeProperties_scope')]"
+					},
+					"AzureBlobStorageSourceDatasetEntity_properties_typeProperties_fileName": {
+						"value": "[parameters('AzureBlobStorageSourceDatasetEntity_properties_typeProperties_fileName')]"
+					},
+					"AzureBlobStorageSourceDatasetEntity_properties_typeProperties_folderPath": {
+						"value": "[parameters('AzureBlobStorageSourceDatasetEntity_properties_typeProperties_folderPath')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "pcs-adf-payroll360-dev_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'pcs-adf-payroll360-dev_ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "pcs-adf-payroll360-dev_ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'pcs-adf-payroll360-dev_ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "pcs-adf-payroll360-dev_ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'pcs-adf-payroll360-dev_ArmTemplate_2')]"
+			]
+		},
+		{
+			"name": "pcs-adf-payroll360-dev_ArmTemplate_4",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'pcs-adf-payroll360-dev_ArmTemplate_3')]"
+			]
+		},
+		{
+			"name": "pcs-adf-payroll360-dev_ArmTemplate_5",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"TriggerForADFInsertFileReceivedReliusPaylocity_properties_PipelineReliusPaylocity_parameters_FileName": {
+						"value": "[parameters('TriggerForADFInsertFileReceivedReliusPaylocity_properties_PipelineReliusPaylocity_parameters_FileName')]"
+					},
+					"TriggerForADFInsertFileReceivedReliusPaylocity_properties_PipelineReliusPaylocity_parameters_FilePath": {
+						"value": "[parameters('TriggerForADFInsertFileReceivedReliusPaylocity_properties_PipelineReliusPaylocity_parameters_FilePath')]"
+					},
+					"TriggerForADFInsertFileReceivedReliusPaylocity_properties_typeProperties_scope": {
+						"value": "[parameters('TriggerForADFInsertFileReceivedReliusPaylocity_properties_typeProperties_scope')]"
+					},
+					"ConsolidatedADFTrigger_properties_ConsolidatedPipeline_parameters_FileName": {
+						"value": "[parameters('ConsolidatedADFTrigger_properties_ConsolidatedPipeline_parameters_FileName')]"
+					},
+					"ConsolidatedADFTrigger_properties_ConsolidatedPipeline_parameters_FilePath": {
+						"value": "[parameters('ConsolidatedADFTrigger_properties_ConsolidatedPipeline_parameters_FilePath')]"
+					},
+					"ConsolidatedADFTrigger_properties_typeProperties_scope": {
+						"value": "[parameters('ConsolidatedADFTrigger_properties_typeProperties_scope')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'pcs-adf-payroll360-dev_ArmTemplate_4')]"
+			]
+		}
+	]
+}

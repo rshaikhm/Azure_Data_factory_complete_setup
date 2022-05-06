@@ -1,0 +1,58 @@
+{
+	"name": "DS_ABS_DataTransform_MetaDataMaster_POC",
+	"properties": {
+		"description": "DS_ABS_DataTransform_MetaDataMaster_POC",
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Master_Metadata_Mapping_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Inbound_Source_Setup_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Mapping_Name",
+				"type": "varchar"
+			},
+			{
+				"name": "IsActive",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "Created_By",
+				"type": "varchar"
+			},
+			{
+				"name": "Created_Date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "Updated_By",
+				"type": "varchar"
+			},
+			{
+				"name": "Updated_Date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "tbl_Master_Metadata_Mapping"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

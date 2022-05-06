@@ -1,0 +1,52 @@
+{
+	"name": "CombineOmniDataHeaderFooter",
+	"properties": {
+		"activities": [
+			{
+				"name": "CombineOmniDataHeaderFooter",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "CombineOmniDataHeaderFooter Data Flow",
+						"type": "DataFlowReference",
+						"parameters": {
+							"FileReceivedID": {
+								"value": "@pipeline().parameters.FileReceivedID",
+								"type": "Expression"
+							},
+							"InboundSourceSetupID": {
+								"value": "@pipeline().parameters.InboundSourceSetupID",
+								"type": "Expression"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"parameters": {
+			"InboundSourceSetupID": {
+				"type": "int"
+			},
+			"FileReceivedID": {
+				"type": "int"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-02-02T18:52:59Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

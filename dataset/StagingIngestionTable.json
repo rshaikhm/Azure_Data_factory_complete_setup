@@ -1,0 +1,16 @@
+{
+	"name": "StagingIngestionTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureIngestiontablelink",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "tbl_Staging_Contribution_Data"
+		}
+	}
+}

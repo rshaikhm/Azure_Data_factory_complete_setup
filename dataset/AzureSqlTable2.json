@@ -1,0 +1,86 @@
+{
+	"name": "AzureSqlTable2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseforVoya",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"file_received_id": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "rowid",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "rowno",
+				"type": "nvarchar"
+			},
+			{
+				"name": "column2",
+				"type": "nvarchar"
+			},
+			{
+				"name": "column3",
+				"type": "nvarchar"
+			},
+			{
+				"name": "column4",
+				"type": "nvarchar"
+			},
+			{
+				"name": "column5",
+				"type": "nvarchar"
+			},
+			{
+				"name": "column6",
+				"type": "nvarchar"
+			},
+			{
+				"name": "column7",
+				"type": "nvarchar"
+			},
+			{
+				"name": "column8",
+				"type": "nvarchar"
+			},
+			{
+				"name": "column9",
+				"type": "nvarchar"
+			},
+			{
+				"name": "column10",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Setno",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "Parentid",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "file_received_id",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "tbl_Voya"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,32 @@
+{
+	"name": "dataflowVoya",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedVoya",
+						"type": "DatasetReference"
+					},
+					"name": "sourcevoya"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTableVoya",
+						"type": "DatasetReference"
+					},
+					"name": "sinkvoya"
+				}
+			],
+			"transformations": [
+				{
+					"name": "DerivedColumnvoya"
+				}
+			],
+			"script": "parameters{\n\tdsfile_received_id as integer,\n\tparameter1 as integer\n}\nsource(output(\n\t\tColumn_1 as string,\n\t\tColumn_2 as string,\n\t\tColumn_3 as string,\n\t\tColumn_4 as string,\n\t\tColumn_5 as string,\n\t\tColumn_6 as string,\n\t\tColumn_7 as string,\n\t\tColumn_8 as string,\n\t\tColumn_9 as string,\n\t\tColumn_10 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> sourcevoya\nsourcevoya derive(file_received_id = $dsfile_received_id) ~> DerivedColumnvoya\nDerivedColumnvoya sink(input(\n\t\trowid as integer,\n\t\trowno as string,\n\t\tcolumn2 as string,\n\t\tcolumn3 as string,\n\t\tcolumn4 as string,\n\t\tcolumn5 as string,\n\t\tcolumn6 as string,\n\t\tcolumn7 as string,\n\t\tcolumn8 as string,\n\t\tcolumn9 as string,\n\t\tcolumn10 as string,\n\t\tSetno as decimal(18,0),\n\t\tParentid as decimal(18,0),\n\t\tfile_received_id as decimal(18,0)\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tfile_received_id,\n\t\trowno = Column_1,\n\t\tcolumn2 = Column_2,\n\t\tcolumn3 = Column_3,\n\t\tcolumn4 = Column_4,\n\t\tcolumn5 = Column_5,\n\t\tcolumn6 = Column_6,\n\t\tcolumn7 = Column_7,\n\t\tcolumn8 = Column_8,\n\t\tcolumn9 = Column_9,\n\t\tcolumn10 = Column_10\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sinkvoya"
+		}
+	}
+}

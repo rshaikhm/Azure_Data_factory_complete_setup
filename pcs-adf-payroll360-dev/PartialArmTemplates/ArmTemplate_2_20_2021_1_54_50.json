@@ -1,0 +1,754 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "pcs-adf-payroll360-dev"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Check Hierarchy')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Is Hierarchical",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "checkHierarchy",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('checkHierarchy').output.firstRow.IsHierarchy,'Y')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Execute Non Hierarchical Pipeline",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExcelCSVNonHierarchical",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"ExcelOrCsv": {
+												"value": "@pipeline().parameters.ExcelOrCsv",
+												"type": "Expression"
+											},
+											"delimiter": {
+												"value": "@pipeline().parameters.delimiter",
+												"type": "Expression"
+											},
+											"folder": {
+												"value": "@pipeline().parameters.folder",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											},
+											"Filenamewithextension": {
+												"value": "@pipeline().parameters.Filenamewithextension",
+												"type": "Expression"
+											},
+											"sheet": {
+												"value": "@pipeline().parameters.sheet",
+												"type": "Expression"
+											},
+											"InboundSourceSetupID": {
+												"value": "@pipeline().parameters.InboundSourceSetupID",
+												"type": "Expression"
+											},
+											"FileVendorID": {
+												"value": "@pipeline().parameters.FileVendorID",
+												"type": "Expression"
+											},
+											"FileReceivedID": {
+												"value": "@pipeline().parameters.FileReceivedID",
+												"type": "Expression"
+											},
+											"DataHeaderRowNmber": {
+												"value": "@pipeline().parameters.HeaderRowNumber",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "ErrorNonHierarchical",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Execute Non Hierarchical Pipeline",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ErrorBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "ErrorFileDelete",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "ErrorNonHierarchical",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								},
+								{
+									"name": "ERRORStatusUpdate",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "ErrorFileDelete",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderStoredProcedureName": "[[dbo].[SP_File_Process_Status]",
+											"storedProcedureParameters": {
+												"File_Received_ID": {
+													"type": "Int32",
+													"value": {
+														"value": "@pipeline().parameters.FileReceivedID",
+														"type": "Expression"
+													}
+												},
+												"Status": {
+													"type": "String",
+													"value": "ERROR"
+												}
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "AzureSqlTable1",
+											"type": "DatasetReference"
+										}
+									}
+								},
+								{
+									"name": "SuccessNonHierarchical",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Execute Non Hierarchical Pipeline",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "SuccessBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												},
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "ArchiveFileDelete",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "SuccessNonHierarchical",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								},
+								{
+									"name": "ProcessedUpdateStatus",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "ArchiveFileDelete",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderStoredProcedureName": "[[dbo].[SP_File_Process_Status]",
+											"storedProcedureParameters": {
+												"File_Received_ID": {
+													"type": "Int32",
+													"value": {
+														"value": "@pipeline().parameters.FileReceivedID",
+														"type": "Expression"
+													}
+												},
+												"Status": {
+													"type": "String",
+													"value": "PROCESSED"
+												}
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "AzureSqlTable1",
+											"type": "DatasetReference"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Execute hierarchical pipeline",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExcelCSVHierarchical",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"ExcelOrCsv": {
+												"value": "@pipeline().parameters.ExcelOrCsv",
+												"type": "Expression"
+											},
+											"delimiter": {
+												"value": "@pipeline().parameters.delimiter",
+												"type": "Expression"
+											},
+											"folder": {
+												"value": "@pipeline().parameters.folder",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											},
+											"filenamewithextension": {
+												"value": "@pipeline().parameters.Filenamewithextension",
+												"type": "Expression"
+											},
+											"sheet": {
+												"value": "@pipeline().parameters.sheet",
+												"type": "Expression"
+											},
+											"inboundsourcesetupID": {
+												"value": "@pipeline().parameters.InboundSourceSetupID",
+												"type": "Expression"
+											},
+											"filerecievedID": {
+												"value": "@pipeline().parameters.FileReceivedID",
+												"type": "Expression"
+											},
+											"lookupProcResult": {
+												"value": "@pipeline().parameters.lookupProcResult",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "ErrorHierarchicalData",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Execute hierarchical pipeline",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ErrorBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "ErrorFileDeleteHierarchical",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "ErrorHierarchicalData",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "SourceBlobPath",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@pipeline().parameters.Filenamewithextension",
+													"type": "Expression"
+												},
+												"FilePath": {
+													"value": "@pipeline().parameters.container",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								},
+								{
+									"name": "ERRORStatusUpdateHierarchical",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "ErrorFileDeleteHierarchical",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderStoredProcedureName": "[[dbo].[SP_File_Process_Status]",
+											"storedProcedureParameters": {
+												"File_Received_ID": {
+													"type": "Int32",
+													"value": {
+														"value": "@pipeline().parameters.FileReceivedID",
+														"type": "Expression"
+													}
+												},
+												"Status": {
+													"type": "String",
+													"value": "ERROR"
+												}
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "AzureSqlTable1",
+											"type": "DatasetReference"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "checkHierarchy",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[Sp_IsHierarchicalData]",
+								"storedProcedureParameters": {
+									"inboundSourceSetupID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.InboundSourceSetupID",
+											"type": "Expression"
+										}
+									},
+									"isHierarchy": {
+										"type": "String",
+										"value": null
+									},
+									"PayrollProviderCode": {
+										"type": "String",
+										"value": null
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"ExcelOrCsv": {
+						"type": "String",
+						"defaultValue": "csv"
+					},
+					"delimiter": {
+						"type": "string"
+					},
+					"folder": {
+						"type": "string"
+					},
+					"container": {
+						"type": "string"
+					},
+					"Filenamewithextension": {
+						"type": "string"
+					},
+					"sheet": {
+						"type": "string",
+						"defaultValue": "sheet1"
+					},
+					"InboundSourceSetupID": {
+						"type": "int"
+					},
+					"FileVendorID": {
+						"type": "string",
+						"defaultValue": "1234"
+					},
+					"FileReceivedID": {
+						"type": "string"
+					},
+					"lookupProcResult": {
+						"type": "string",
+						"defaultValue": "0"
+					},
+					"HeaderRowNumber": {
+						"type": "int"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-04T07:27:50Z"
+			},
+			"dependsOn": []
+		}
+	]
+}

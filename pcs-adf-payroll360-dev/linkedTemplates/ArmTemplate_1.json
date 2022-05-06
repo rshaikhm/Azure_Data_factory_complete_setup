@@ -1,0 +1,1695 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "pcs-adf-payroll360-dev"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStorageSourceDatasetEntity1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureBlob",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabaseDestinationStore')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tbl_Voya"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabaseDestinationStore1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlIngestionTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureIngestiontablelink",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Landing_Contribution_Data_ID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "File_received_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Inbound_File_Setup_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Paylocity_Company_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Check_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "SSN",
+						"type": "varchar"
+					},
+					{
+						"name": "First_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Middle_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Last_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Title",
+						"type": "varchar"
+					},
+					{
+						"name": "Employee_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Gender",
+						"type": "varchar"
+					},
+					{
+						"name": "Employee_Status",
+						"type": "varchar"
+					},
+					{
+						"name": "Marital_Status",
+						"type": "varchar"
+					},
+					{
+						"name": "Division_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Union_Status",
+						"type": "varchar"
+					},
+					{
+						"name": "Address_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Address_2",
+						"type": "varchar"
+					},
+					{
+						"name": "City",
+						"type": "varchar"
+					},
+					{
+						"name": "State",
+						"type": "varchar"
+					},
+					{
+						"name": "Zip",
+						"type": "varchar"
+					},
+					{
+						"name": "Birth_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Hire_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Termination_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Rehire_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Gross_Earnings",
+						"type": "varchar"
+					},
+					{
+						"name": "Pay_Period_Hours",
+						"type": "varchar"
+					},
+					{
+						"name": "Employee_Deferral",
+						"type": "varchar"
+					},
+					{
+						"name": "Employee_Roth",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Payments",
+						"type": "varchar"
+					},
+					{
+						"name": "Employee_After_Tax",
+						"type": "varchar"
+					},
+					{
+						"name": "Employer_Match",
+						"type": "varchar"
+					},
+					{
+						"name": "Safe_Harbor_Match",
+						"type": "varchar"
+					},
+					{
+						"name": "Safe_Harbor_Non_Elective",
+						"type": "varchar"
+					},
+					{
+						"name": "Qualified_Matching_Contribution",
+						"type": "varchar"
+					},
+					{
+						"name": "Qualified_Non_Elective_Contribution",
+						"type": "varchar"
+					},
+					{
+						"name": "Profit_Sharing",
+						"type": "varchar"
+					},
+					{
+						"name": "Money_Purchase",
+						"type": "varchar"
+					},
+					{
+						"name": "Pay_Frequency",
+						"type": "varchar"
+					},
+					{
+						"name": "Email",
+						"type": "varchar"
+					},
+					{
+						"name": "Phone_Number",
+						"type": "varchar"
+					},
+					{
+						"name": "Pay_Type",
+						"type": "varchar"
+					},
+					{
+						"name": "Adjusted_Seniority_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Leave_Of_Absence_Begin_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Leave_Of_Absence_End_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Payroll_Begin_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Payroll_End_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Cost_Center_1_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Cost_Center_2_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Cost_Center_3_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_Earnings",
+						"type": "varchar"
+					},
+					{
+						"name": "Excluded_Earnings",
+						"type": "varchar"
+					},
+					{
+						"name": "Section_125",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Additional_Principal_Payments",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Number",
+						"type": "varchar"
+					},
+					{
+						"name": "Rollover",
+						"type": "varchar"
+					},
+					{
+						"name": "Rollover_Roth",
+						"type": "varchar"
+					},
+					{
+						"name": "YTD_Gross_Earnings",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Earnings",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Hours",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Excluded_Earnings",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Section_125",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Employee_Deferral",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Employee_Roth",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Employee_After_Tax",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Loan_Payments",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Loan_Number",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Employer_Match",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Safe_Harbor_Match",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Qualified_Matching_Contribution",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Safe_Harbor_Non_Elective",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Qualified_Non_Elective_Contribution",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Profit_Sharing",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Money_Purchase",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Rollover",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_YTD_Rollover_Roth",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Plan_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Investment_Election",
+						"type": "varchar"
+					},
+					{
+						"name": "Investment_Change_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Recipient_Vendor_Plan_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Detail",
+						"type": "varchar"
+					},
+					{
+						"name": "Employer_EIN",
+						"type": "varchar"
+					},
+					{
+						"name": "Employer_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Employer_Plan_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Employer_Sub_Plan_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Originating_Vendor_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Originating_Vendor_Sub_Plan_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Recipient_Vendor_Sub_Plan_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Type_of_Account",
+						"type": "varchar"
+					},
+					{
+						"name": "HR_Area_Or_Location_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "HR_Sub_Area",
+						"type": "varchar"
+					},
+					{
+						"name": "Adjusted_Date_of_Hire",
+						"type": "varchar"
+					},
+					{
+						"name": "Payroll_Mode",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Code_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Code_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Code_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Code_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Code_5",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_5",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Code_6",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_6",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Code_7",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_7",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Code_8",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Source_Amount_8",
+						"type": "varchar"
+					},
+					{
+						"name": "Final_Contribution_Indicator",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Number_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Repayment_Amount_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Number_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Repayment_Amout_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Number_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Repayment_Amount_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Number_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Repayment_Amount_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Number_5",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Repayment_Amount_5",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_52",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_53",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_54",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_55",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_56",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_57",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_58",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_59",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_60",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_61",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_62",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_63",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_64",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_65",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_66",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_67",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_1_Vendor",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_1_File_Release_Time",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_1_Total_Amount_in_File",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_1_Number_of_Contributions",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_1_Datetime",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_1_Number_of_Participants",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Plan_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Remitter_Plan_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Column_D",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Column_E",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Payroll_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Total_Amount_in_Plan",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_2_Number_of_Participants",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_SSN",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Last_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_First_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Remitter_Plan_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Remittance_Type",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Source_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Number_of_Participants",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Column_I",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_3_Amount",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Plan_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Remitter_Plan_Code",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Column_D",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Column_E",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Payroll_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Total_Amount_in_Plan",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_4_Number_of_Participants",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_5",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_5_Vendor",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_5_File_Release_Time",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_5_Total_Amount_in_File",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_5_Number_of_Contributions",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_5_Datetime",
+						"type": "varchar"
+					},
+					{
+						"name": "Record_Level_5_Number_of_Participants",
+						"type": "varchar"
+					},
+					{
+						"name": "Remittance_Type",
+						"type": "varchar"
+					},
+					{
+						"name": "Contribution_Rate",
+						"type": "varchar"
+					},
+					{
+						"name": "Loan_Balance",
+						"type": "varchar"
+					},
+					{
+						"name": "Comments",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_5",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_6",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_7",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_8",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_9",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_10",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_1",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_2",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_3",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_4",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_5",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_6",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_7",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_8",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_9",
+						"type": "varchar"
+					},
+					{
+						"name": "Footer_Column_10",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_50",
+						"type": "varchar"
+					},
+					{
+						"name": "OMNI_Field_51",
+						"type": "varchar"
+					},
+					{
+						"name": "PAYLOCITY_Field_71",
+						"type": "varchar"
+					},
+					{
+						"name": "PAYLOCITY_Field_72",
+						"type": "varchar"
+					},
+					{
+						"name": "PAYLOCITY_Field_73",
+						"type": "varchar"
+					},
+					{
+						"name": "PAYLOCITY_Field_74",
+						"type": "varchar"
+					},
+					{
+						"name": "Status",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tbl_Landing_Contribution_Data"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlProcedure')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "File_Received_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "File_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Received_Date_And_Time",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Inbound_Source_Setup_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Loaded_By",
+						"type": "varchar"
+					},
+					{
+						"name": "File_Type",
+						"type": "varchar"
+					},
+					{
+						"name": "As_OF_Date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Actual_File",
+						"type": "varchar"
+					},
+					{
+						"name": "Status",
+						"type": "varchar"
+					},
+					{
+						"name": "Created_By",
+						"type": "varchar"
+					},
+					{
+						"name": "Updated_By",
+						"type": "varchar"
+					},
+					{
+						"name": "Created_Date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Updated_Date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tbl_File_Received"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlTable2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabaseforVoya",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"file_received_id": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "rowid",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "rowno",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column3",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column4",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column5",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column6",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column7",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column8",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column9",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column10",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Setno",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "Parentid",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "file_received_id",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tbl_Voya"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlTableVoya')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabaseVoya",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "rowid",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "rowno",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column3",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column4",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column5",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column6",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column7",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column8",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column9",
+						"type": "nvarchar"
+					},
+					{
+						"name": "column10",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Setno",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "Parentid",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "file_received_id",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tbl_Voya"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azureftpblob')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "azureftpblob",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "azureftpdemo"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CopyJsonTOCSV_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage4",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "JsonToCSV.json",
+						"container": "for-development"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "string"
+						},
+						"type": {
+							"type": "string"
+						},
+						"name": {
+							"type": "string"
+						},
+						"ppu": {
+							"type": "number"
+						},
+						"batters": {
+							"type": "object",
+							"properties": {
+								"batter": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"type": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						},
+						"topping": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "string"
+									},
+									"type": {
+										"type": "string"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage4",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "VojaTestJson.Json",
+						"container": "for-development"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"Prop_0": {
+							"type": "string"
+						},
+						"Prop_1": {
+							"type": "string"
+						},
+						"Prop_2": {
+							"type": "string"
+						},
+						"Prop_3": {
+							"type": "string"
+						},
+						"Prop_4": {
+							"type": "string"
+						},
+						"Prop_5": {
+							"type": "string"
+						},
+						"Prop_6": {
+							"type": "string"
+						},
+						"Prop_7": {
+							"type": "string"
+						},
+						"Prop_8": {
+							"type": "null"
+						},
+						"Prop_9": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABS_DataTransform_MetaDataMaster_POC')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "DS_ABS_DataTransform_MetaDataMaster_POC",
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Master_Metadata_Mapping_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Inbound_Source_Setup_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Mapping_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "IsActive",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Created_By",
+						"type": "varchar"
+					},
+					{
+						"name": "Created_Date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Updated_By",
+						"type": "varchar"
+					},
+					{
+						"name": "Updated_Date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tbl_Master_Metadata_Mapping"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABS_DataTransform_TransactionMetaData_POC')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "DS_ABS_DataTransform_TransactionMetaData_POC",
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Header_Metadata_Table_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Header_Column_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Header_Column_Meaning",
+						"type": "varchar"
+					},
+					{
+						"name": "IsActive",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Created_By",
+						"type": "varchar"
+					},
+					{
+						"name": "Created_Date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Updated_By",
+						"type": "varchar"
+					},
+					{
+						"name": "Updated_Date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tbl_Metadata_Mapping"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABS_DataTransform_WranglePOC')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "DS_ABS_DataTransform_WranglePOC",
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "DataTransformTestFile.txt",
+						"container": "for-development"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABS_OMNI_ERROR')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "omni/error",
+						"container": "tsm"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABS_OMNI_INPUT')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "omni",
+						"container": "tsm"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABS_PAYLOCITY_ERROR')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "paylocity/error",
+						"container": "tsm"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABS_PAYLOCITY_INPUT')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "paylocity",
+						"container": "tsm"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABS_RELIUS_PAYLOCITY_ERROR')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageRelius",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "paylocity/error",
+						"container": "relius"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ABS_RELIUS_PAYLOCITY_INPUT')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageRelius",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "paylocity",
+						"container": "relius"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		}
+	]
+}

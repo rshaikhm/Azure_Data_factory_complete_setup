@@ -1,0 +1,708 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "pcs-adf-payroll360-dev"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/ConsolidatedPipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "ConsolidatedPipeline",
+				"activities": [
+					{
+						"name": "CompareTriggerPathNameForErrorOrArchieve",
+						"description": "CompareTriggerPathNameForErrorOrArchieve",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "LookupCheckCorrectFolderPathForFileInsert",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('LookupCheckCorrectFolderPathForFileInsert').output.firstRow.Result,1)",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "SetFilePathHasErrorOrArchiveTrue",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FilePathHasErrorOrArchive",
+										"value": true
+									}
+								},
+								{
+									"name": "SetOutputFromStoredProcedure2",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "SetFilePathHasErrorOrArchiveTrue",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "OutputFromStoredProcedure",
+										"value": "2"
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "SetFilePathHasErrorOrArchiveFalse",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FilePathHasErrorOrArchive",
+										"value": false
+									}
+								},
+								{
+									"name": "LookupForSP_InsertIntoFileReceived",
+									"description": "LookupForSP_InsertIntoFileReceived",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "SetFilePathHasErrorOrArchiveFalse",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderStoredProcedureName": "[[dbo].[SP_InsertIntoFileReceived]",
+											"storedProcedureParameters": {
+												"ActualFile": {
+													"type": "String",
+													"value": null
+												},
+												"ContainerName": {
+													"type": "String",
+													"value": "NA"
+												},
+												"Delimiter": {
+													"type": "String",
+													"value": "NA"
+												},
+												"EmailId": {
+													"type": "String",
+													"value": null
+												},
+												"FileName": {
+													"type": "String",
+													"value": {
+														"value": "@pipeline().parameters.FileName",
+														"type": "Expression"
+													}
+												},
+												"FileNameExtension": {
+													"type": "String",
+													"value": "NA"
+												},
+												"FileReceivedId": {
+													"type": "Int32",
+													"value": "0"
+												},
+												"FileType": {
+													"type": "Int32",
+													"value": null
+												},
+												"FolderName": {
+													"type": "String",
+													"value": {
+														"value": "@variables('FolderName')",
+														"type": "Expression"
+													}
+												},
+												"InboundSourceSetupId": {
+													"type": "Int32",
+													"value": "0"
+												},
+												"IngestionType": {
+													"type": "Int32",
+													"value": null
+												},
+												"IsColumnHeaderAvailable": {
+													"type": "String",
+													"value": "NA"
+												},
+												"Result": {
+													"type": "Int32",
+													"value": "0"
+												},
+												"SheetName": {
+													"type": "String",
+													"value": "NA"
+												},
+												"SourceProviderName": {
+													"type": "String",
+													"value": null
+												},
+												"StorageLink": {
+													"type": "String",
+													"value": {
+														"value": "@pipeline().parameters.FilePath",
+														"type": "Expression"
+													}
+												},
+												"UserName": {
+													"type": "String",
+													"value": null
+												},
+												"DataHeaderRow": {
+													"type": "Int32",
+													"value": "0"
+												}
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "AzureSqlTable1",
+											"type": "DatasetReference"
+										},
+										"firstRowOnly": false
+									}
+								},
+								{
+									"name": "SetOutputFromStoredProcedure",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "OutputFromStoredProcedure",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].Result)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetFileReceivedID",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FileReceivedID",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].FileReceivedID)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetInboundSourceSetupID",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "InboundSourceSetupID",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].InboundSourceSetupID)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetFileExtension",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FileExtension",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].FileExtension)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetContainerName",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "ContainerName",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].ContainerName)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetSheetName",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "SheetName",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].SheetName)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetFolderName",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FolderName",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].FolderName)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetDataHeaderRow",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "DataHeaderRow",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].DataHeaderRow)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "SetDelimiter",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "LookupForSP_InsertIntoFileReceived",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "Delimiter",
+										"value": {
+											"value": "@string(activity('LookupForSP_InsertIntoFileReceived').output.value[0].Delimiter)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "LookupCheckCorrectFolderPathForFileInsert",
+						"description": "LookupCheckCorrectFolderPathForFileInsert",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[SP_CheckCorrectFolderPathForFileInsert]",
+								"storedProcedureParameters": {
+									"FolderPath": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.FilePath",
+											"type": "Expression"
+										}
+									},
+									"Result": {
+										"type": "Int32",
+										"value": "0"
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference"
+							}
+						}
+					},
+					{
+						"name": "SwitchResultOutputOfSP",
+						"type": "Switch",
+						"dependsOn": [
+							{
+								"activity": "CompareTriggerPathNameForErrorOrArchieve",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"on": {
+								"value": "@variables('OutputFromStoredProcedure')",
+								"type": "Expression"
+							},
+							"cases": [
+								{
+									"value": "0",
+									"activities": [
+										{
+											"name": "CopydataFromFilePath",
+											"description": "CopydataFromFilePath",
+											"type": "Copy",
+											"dependsOn": [],
+											"policy": {
+												"timeout": "7.00:00:00",
+												"retry": 0,
+												"retryIntervalInSeconds": 30,
+												"secureOutput": false,
+												"secureInput": false
+											},
+											"userProperties": [],
+											"typeProperties": {
+												"source": {
+													"type": "DelimitedTextSource",
+													"storeSettings": {
+														"type": "AzureBlobStorageReadSettings",
+														"recursive": false,
+														"enablePartitionDiscovery": false
+													},
+													"formatSettings": {
+														"type": "DelimitedTextReadSettings"
+													}
+												},
+												"sink": {
+													"type": "DelimitedTextSink",
+													"storeSettings": {
+														"type": "AzureBlobStorageWriteSettings"
+													},
+													"formatSettings": {
+														"type": "DelimitedTextWriteSettings",
+														"quoteAllText": true,
+														"fileExtension": ".txt"
+													}
+												},
+												"enableStaging": false,
+												"translator": {
+													"type": "TabularTranslator",
+													"typeConversion": true,
+													"typeConversionSettings": {
+														"allowDataTruncation": true,
+														"treatBooleanAsNumber": false
+													}
+												}
+											},
+											"inputs": [
+												{
+													"referenceName": "SourceBlobPath",
+													"type": "DatasetReference",
+													"parameters": {
+														"FileName": {
+															"value": "@pipeline().parameters.FileName",
+															"type": "Expression"
+														},
+														"FilePath": {
+															"value": "@pipeline().parameters.FilePath",
+															"type": "Expression"
+														}
+													}
+												}
+											],
+											"outputs": [
+												{
+													"referenceName": "ErrorBlobPath",
+													"type": "DatasetReference",
+													"parameters": {
+														"FileName": {
+															"value": "@pipeline().parameters.FileName",
+															"type": "Expression"
+														},
+														"FilePath": {
+															"value": "@pipeline().parameters.FilePath",
+															"type": "Expression"
+														}
+													}
+												}
+											]
+										},
+										{
+											"name": "DeleteSourceFile",
+											"description": "DeleteSourceFile",
+											"type": "Delete",
+											"dependsOn": [
+												{
+													"activity": "CopydataFromFilePath",
+													"dependencyConditions": [
+														"Succeeded"
+													]
+												}
+											],
+											"policy": {
+												"timeout": "7.00:00:00",
+												"retry": 0,
+												"retryIntervalInSeconds": 30,
+												"secureOutput": false,
+												"secureInput": false
+											},
+											"userProperties": [],
+											"typeProperties": {
+												"dataset": {
+													"referenceName": "SourceBlobPath",
+													"type": "DatasetReference",
+													"parameters": {
+														"FileName": {
+															"value": "@pipeline().parameters.FileName",
+															"type": "Expression"
+														},
+														"FilePath": {
+															"value": "@pipeline().parameters.FilePath",
+															"type": "Expression"
+														}
+													}
+												},
+												"enableLogging": false,
+												"storeSettings": {
+													"type": "AzureBlobStorageReadSettings",
+													"recursive": false,
+													"enablePartitionDiscovery": false
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "1",
+									"activities": [
+										{
+											"name": "Check Hierarchy",
+											"type": "ExecutePipeline",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"pipeline": {
+													"referenceName": "Check Hierarchy",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"ExcelOrCsv": {
+														"value": "@variables('FileExtension')",
+														"type": "Expression"
+													},
+													"delimiter": {
+														"value": "@variables('Delimiter')",
+														"type": "Expression"
+													},
+													"folder": {
+														"value": "@variables('FolderName')",
+														"type": "Expression"
+													},
+													"container": {
+														"value": "@variables('ContainerName')",
+														"type": "Expression"
+													},
+													"Filenamewithextension": {
+														"value": "@pipeline().parameters.FileName",
+														"type": "Expression"
+													},
+													"sheet": {
+														"value": "@variables('SheetName')",
+														"type": "Expression"
+													},
+													"InboundSourceSetupID": {
+														"value": "@variables('InboundSourceSetupID')",
+														"type": "Expression"
+													},
+													"FileReceivedID": {
+														"value": "@variables('FileReceivedID')",
+														"type": "Expression"
+													},
+													"HeaderRowNumber": {
+														"value": "@variables('DataHeaderRow')",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "2",
+									"activities": [
+										{
+											"name": "SetSwitch2",
+											"type": "SetVariable",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"variableName": "Switch",
+												"value": "'2'"
+											}
+										}
+									]
+								}
+							],
+							"defaultActivities": [
+								{
+									"name": "SetDefaultSwitch",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "Switch",
+										"value": "'Default'"
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					},
+					"FilePath": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"FilePathHasErrorOrArchive": {
+						"type": "Boolean"
+					},
+					"OutputFromStoredProcedure": {
+						"type": "String"
+					},
+					"FileReceivedID": {
+						"type": "String",
+						"defaultValue": "0"
+					},
+					"InboundSourceSetupID": {
+						"type": "String",
+						"defaultValue": "0"
+					},
+					"Delimiter": {
+						"type": "String"
+					},
+					"FileExtension": {
+						"type": "String",
+						"defaultValue": "NA"
+					},
+					"SheetName": {
+						"type": "String",
+						"defaultValue": "NA"
+					},
+					"FolderName": {
+						"type": "String",
+						"defaultValue": "NA"
+					},
+					"ContainerName": {
+						"type": "String",
+						"defaultValue": "NA"
+					},
+					"Switch": {
+						"type": "String",
+						"defaultValue": "NA"
+					},
+					"DataHeaderRow": {
+						"type": "String",
+						"defaultValue": "0"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-04T05:32:23Z"
+			},
+			"dependsOn": []
+		}
+	]
+}

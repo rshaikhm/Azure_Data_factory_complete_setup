@@ -1,0 +1,252 @@
+{
+	"name": "ExcelCSVNonHierarchical",
+	"properties": {
+		"activities": [
+			{
+				"name": "column header Available switch",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "Set Coulmn Header Value",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@variables('ColumnHeaderAvailable')",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "Y",
+							"activities": [
+								{
+									"name": "Execute With Header Excel Or CSV",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "With Header Excel Or CSV",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"ExcelOrCsv": {
+												"value": "@pipeline().parameters.ExcelOrCsv",
+												"type": "Expression"
+											},
+											"Container": {
+												"value": "@pipeline().parameters.container",
+												"type": "Expression"
+											},
+											"folder": {
+												"value": "@pipeline().parameters.folder",
+												"type": "Expression"
+											},
+											"filenamewithextension": {
+												"value": "@pipeline().parameters.Filenamewithextension",
+												"type": "Expression"
+											},
+											"sheet": {
+												"value": "@pipeline().parameters.sheet",
+												"type": "Expression"
+											},
+											"InboundSourceSetupID": {
+												"value": "@pipeline().parameters.InboundSourceSetupID",
+												"type": "Expression"
+											},
+											"FileReceivedID": {
+												"value": "@pipeline().parameters.FileReceivedID",
+												"type": "Expression"
+											},
+											"FileVendorID": {
+												"value": "@pipeline().parameters.FileVendorID",
+												"type": "Expression"
+											},
+											"Delimiter": {
+												"value": "@pipeline().parameters.delimiter",
+												"type": "Expression"
+											},
+											"DataHeaderRowNumber": {
+												"value": "@pipeline().parameters.DataHeaderRowNmber",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					],
+					"defaultActivities": [
+						{
+							"name": "Headerless Excel Or CSV",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Headerless Excel OR CSV",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"ExcelOrCSV": {
+										"value": "@pipeline().parameters.ExcelOrCsv",
+										"type": "Expression"
+									},
+									"Folder": {
+										"value": "@pipeline().parameters.folder",
+										"type": "Expression"
+									},
+									"Container": {
+										"value": "@pipeline().parameters.container",
+										"type": "Expression"
+									},
+									"Sheet": {
+										"value": "@pipeline().parameters.sheet",
+										"type": "Expression"
+									},
+									"FileReceivedID": {
+										"value": "@pipeline().parameters.FileReceivedID",
+										"type": "Expression"
+									},
+									"FileNameWITHExtension": {
+										"value": "@pipeline().parameters.Filenamewithextension",
+										"type": "Expression"
+									},
+									"FileVendorID": {
+										"value": "@pipeline().parameters.FileVendorID",
+										"type": "Expression"
+									},
+									"InboundSourceSetupID": {
+										"value": "@pipeline().parameters.InboundSourceSetupID",
+										"type": "Expression"
+									},
+									"Delimiter": {
+										"value": "@pipeline().parameters.delimiter",
+										"type": "Expression"
+									},
+									"DataHeaderRowNumber": {
+										"value": "@pipeline().parameters.DataHeaderRowNmber",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Check Column Header Available",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[Sp_IsHierarchicalData]",
+						"storedProcedureParameters": {
+							"ColumnHeaderAvailable": {
+								"type": "String",
+								"value": null
+							},
+							"inboundSourceSetupID": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.InboundSourceSetupID",
+									"type": "Expression"
+								}
+							},
+							"isHierarchy": {
+								"type": "String",
+								"value": null
+							},
+							"PayrollProviderCode": {
+								"type": "String",
+								"value": null
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Set Coulmn Header Value",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Check Column Header Available",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ColumnHeaderAvailable",
+					"value": {
+						"value": "@activity('Check Column Header Available').output.firstRow.ColumnHeaderAvailable",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"ExcelOrCsv": {
+				"type": "String",
+				"defaultValue": "csv"
+			},
+			"delimiter": {
+				"type": "string"
+			},
+			"folder": {
+				"type": "string"
+			},
+			"container": {
+				"type": "string"
+			},
+			"Filenamewithextension": {
+				"type": "string"
+			},
+			"sheet": {
+				"type": "string"
+			},
+			"InboundSourceSetupID": {
+				"type": "string"
+			},
+			"FileVendorID": {
+				"type": "string"
+			},
+			"FileReceivedID": {
+				"type": "string"
+			},
+			"DataHeaderRowNmber": {
+				"type": "int"
+			}
+		},
+		"variables": {
+			"ColumnHeaderAvailable": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-02-10T18:08:07Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

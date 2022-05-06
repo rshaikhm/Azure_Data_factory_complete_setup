@@ -1,0 +1,58 @@
+{
+	"name": "OmniheaderFooterManage",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "OmniDelimited",
+						"type": "DatasetReference"
+					},
+					"name": "omni"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "OmniHeaderRow",
+						"type": "DatasetReference"
+					},
+					"name": "OmniHeaderRow"
+				},
+				{
+					"dataset": {
+						"referenceName": "OmniFooterRow",
+						"type": "DatasetReference"
+					},
+					"name": "FooteRow"
+				},
+				{
+					"dataset": {
+						"referenceName": "OmniData",
+						"type": "DatasetReference"
+					},
+					"name": "OmniData"
+				}
+			],
+			"transformations": [
+				{
+					"name": "RowNumberforHeader"
+				},
+				{
+					"name": "ConditionalSplit1"
+				},
+				{
+					"name": "SortRownumberDesc"
+				},
+				{
+					"name": "FooterRownumber"
+				},
+				{
+					"name": "ConditionalSplit2"
+				}
+			],
+			"script": "parameters{\n\tContainer as string,\n\tFolder as string,\n\tfilenameandextension as string\n}\nsource(output(\n\t\tColumn_1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> omni\nomni keyGenerate(output(RowNumber as long),\n\tstartAt: 1L) ~> RowNumberforHeader\nRowNumberforHeader split(RowNumber==1,\n\tdisjoint: false) ~> ConditionalSplit1@(OmniHeaderrow, FooterandData)\nConditionalSplit1@FooterandData sort(desc(RowNumber, false)) ~> SortRownumberDesc\nSortRownumberDesc keyGenerate(output(Footerrow as long),\n\tstartAt: 1L) ~> FooterRownumber\nFooterRownumber split(Footerrow==1,\n\tdisjoint: false) ~> ConditionalSplit2@(Footer, OmniData)\nConditionalSplit1@OmniHeaderrow sink(input(\n\t\tColumn_1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['OmniFilteredHeaderData.txt'],\n\ttruncate: true,\n\tmapColumn(\n\t\tColumn_1\n\t),\n\tpartitionBy('hash', 1),\n\tsaveOrder: 0) ~> OmniHeaderRow\nConditionalSplit2@Footer sink(input(\n\t\tColumn_1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['OmniFilterFooterData.txt'],\n\ttruncate: true,\n\tmapColumn(\n\t\tColumn_1\n\t),\n\tpartitionBy('hash', 1)) ~> FooteRow\nConditionalSplit2@OmniData sink(input(\n\t\tColumn_1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['OmniFilteredData.txt'],\n\ttruncate: true,\n\tmapColumn(\n\t\tColumn_1\n\t),\n\tpartitionBy('hash', 1)) ~> OmniData"
+		}
+	}
+}
